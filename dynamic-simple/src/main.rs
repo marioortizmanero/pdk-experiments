@@ -8,7 +8,7 @@ fn usage() {
     println!("Usage: ./main PLUGIN_PATH");
 }
 
-fn run_plugin(path: &str) -> Result<(), Box<dyn std::error::Error>> {
+fn run_plugin(path: &str) -> Result<(), libloading::Error> {
     unsafe {
         let library = Library::new(path)?;
         let min = library.get::<*mut MinFunction>(b"plugin_function\0")?.read();
@@ -16,7 +16,7 @@ fn run_plugin(path: &str) -> Result<(), Box<dyn std::error::Error>> {
         println!("  min(1, 2): {}", min(1, 2));
         println!("  min(-10, 10): {}", min(-10, 10));
         println!("  min(2000, 2000): {}", min(2000, 2000));
-    };
+    }
 
     Ok(())
 }
