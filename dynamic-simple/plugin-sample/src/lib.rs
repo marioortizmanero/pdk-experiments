@@ -15,6 +15,19 @@ fn min(a: i32, b: i32) -> i32 {
 /// This is the second approach, where the function is directly exposed via
 /// dynamic linking, using the Rust ABI.
 #[no_mangle]
-pub extern "Rust" fn with_extern(a: i32, b: i32) -> i32 {
+pub fn with_extern(a: i32, b: i32) -> i32 {
     a.min(b)
 }
+
+// /// Same but with generics
+// #[no_mangle]
+// pub fn with_extern_generics<T: Ord>(a: T, b: T) -> T {
+//     a.min(b)
+// }
+
+// /// This is the second approach, where the function is directly exposed via
+// /// dynamic linking, using the Rust ABI.
+// #[no_mangle]
+// pub fn with_extern(a: Box<dyn Ord>, b: Box<dyn Ord>) -> Box<dyn Ord> {
+//     a.min(b)
+// }
