@@ -1,4 +1,4 @@
-use tremor_core::MinFunction;
+use tremor_core::{MinFunction, MinBuilder};
 
 /// This is what the plugin publicly exports. It has to use `#[no_mangle]` so
 /// that its name is known when loading from the main binary.
@@ -14,20 +14,23 @@ fn min(a: i32, b: i32) -> i32 {
 
 /// This is the second approach, where the function is directly exposed via
 /// dynamic linking, using the Rust ABI.
+///
+/// Using `dylib`, this is equivalent to using `extern "Rust" fn with_extern`.
 #[no_mangle]
 pub fn with_extern(a: i32, b: i32) -> i32 {
     a.min(b)
 }
 
-// /// Same but with generics
-// #[no_mangle]
-// pub fn with_extern_generics<T: Ord>(a: T, b: T) -> T {
-//     a.min(b)
-// }
+/// Attempting to export a generic function in the shared library.
+///
+/// Note that generic functions must be mangled, so trying to set `#[no_mangle]`
+/// will raise a warning.
+pub fn with_extern_generics<M: MinBuilder>(builder: M, a: i32, b: i32) -> i32 {
+    builder.min(a, b)
+}
 
-// /// This is the second approach, where the function is directly exposed via
-// /// dynamic linking, using the Rust ABI.
-// #[no_mangle]
-// pub fn with_extern(a: Box<dyn Ord>, b: Box<dyn Ord>) -> Box<dyn Ord> {
-//     a.min(b)
-// }
+/// Instead of using generics, trying with dynamic dispatching.
+#[no_mangle]
+pub fn with_extern_dyn(builder: &Box<dyn MinBuilder>, a: i32, b: i32) -> i32 {
+    builder.min(a, b)
+}
