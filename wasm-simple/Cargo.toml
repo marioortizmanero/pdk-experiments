@@ -5,4 +5,4 @@ edition = "2018"
 
 [dependencies]
 tremor-core = { path = "tremor-core", version = "0.1.0" }
-wasmer = "2.0.0"
+wasmer-runtime = "0.17.1"
