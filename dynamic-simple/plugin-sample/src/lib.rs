@@ -16,6 +16,10 @@ fn min(a: i32, b: i32) -> i32 {
 /// dynamic linking, using the Rust ABI.
 ///
 /// Using `dylib`, this is equivalent to using `extern "Rust" fn with_extern`.
+///
+/// Exporting functions is both possible with `extern` and `static`, but the
+/// former makes more sense for Rust-to-Rust FFI because it's just simpler and
+/// more straightforward.
 #[no_mangle]
 pub fn with_extern(a: i32, b: i32) -> i32 {
     a.min(b)
