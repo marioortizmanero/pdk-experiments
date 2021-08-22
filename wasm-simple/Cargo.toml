@@ -4,5 +4,5 @@ version = "0.1.0"
 edition = "2018"
 
 [dependencies]
-tremor-core-ws = { path = "tremor-core", version = "0.1.0" }
+common-ws = { path = "common", version = "0.1.0" }
 wasmer = "2.0.0"

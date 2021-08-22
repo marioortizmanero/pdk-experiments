@@ -1,4 +1,4 @@
-use tremor_core_ds::{MinBuilder, MinBuilderFunction, MinFunction};
+use common_ds::{MinBuilder, MinBuilderFunction, MinFunction};
 
 use libloading::Library;
 

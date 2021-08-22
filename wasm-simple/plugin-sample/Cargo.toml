@@ -7,4 +7,4 @@ edition = "2018"
 crate-type = ["cdylib"]
 
 [dependencies]
-tremor-core-ws = { path = "../tremor-core", version = "0.1.0" }
+common-ws = { path = "../common", version = "0.1.0" }

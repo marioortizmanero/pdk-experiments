@@ -21,14 +21,34 @@ mod test {
     const WASM_PATH: &str = "wasm-simple/plugin-sample/target/wasm32-unknown-unknown/release/plugin_sample.wasm";
 
     #[bench]
+    fn dynamic_setup(bench: &mut Bencher) {
+
+    }
+
+    #[bench]
     fn dynamic_simple(bench: &mut Bencher) {
         check_exists(DYNAMIC_PATH);
         bench.iter(|| dynamic_simple::run_plugin(DYNAMIC_PATH, true).unwrap())
     }
 
     #[bench]
+    fn dynamic_complex(bench: &mut Bencher) {
+
+    }
+
+    #[bench]
+    fn wasm_setup(bench: &mut Bencher) {
+
+    }
+
+    #[bench]
     fn wasm_simple(bench: &mut Bencher) {
         check_exists(WASM_PATH);
         bench.iter(|| wasm_simple::run_plugin(WASM_PATH).unwrap())
+    }
+
+    #[bench]
+    fn wasm_complex(bench: &mut Bencher) {
+
     }
 }

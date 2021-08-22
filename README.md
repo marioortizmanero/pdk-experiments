@@ -1,14 +1,14 @@
 # PDK Experiments
 
 This repository contains various experiments written in order to learn more
-about how [Tremor's PDK](https://nullderef.com/blog/gsoc-proposal/) could be
+about how [Tremor's PDK](https://nullderef.com/series/rust-plugins/) could be
 implemented.
 
 The structure is usually the following:
 
 * The `src` directory contains the main binary which loads the plugins.
 * The interface shared between the main binary and the plugin is defined in
-  the `tremor_core` crate.
+  the `common` crate.
 * The plugins live in `plugin-*` directories, which should be compiled as a
   shared library and then loaded from the main binary.
 

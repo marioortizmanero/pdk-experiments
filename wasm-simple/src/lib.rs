@@ -1,4 +1,4 @@
-// use tremor_core_ws::{MinBuilder};
+// use common_ws::{MinBuilder};
 
 use std::{fs, error::Error};
 
