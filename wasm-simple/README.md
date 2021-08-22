@@ -5,7 +5,7 @@ requires a slightly more complicated setup because the plugin has to be built
 for the Wasm platform with the following command instead:
 
 ```
-cargo build --target wasm32-unknown-unknown
+cargo build --target wasm32-unknown-unknown --release
 ```
 
 For which you might need first:

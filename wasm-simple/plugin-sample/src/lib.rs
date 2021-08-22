@@ -1,4 +1,4 @@
-use tremor_core::{MinFunction, MinBuilder};
+use tremor_core_ws::{MinFunction, MinBuilder};
 
 #[no_mangle]
 pub static with_static: MinFunction = with_extern;

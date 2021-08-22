@@ -1,4 +1,4 @@
-use tremor_core::{MinFunction, MinBuilder};
+use tremor_core_ds::{MinFunction, MinBuilder};
 
 /// This is what the plugin publicly exports. It has to use `#[no_mangle]` so
 /// that its name is known when loading from the main binary.
