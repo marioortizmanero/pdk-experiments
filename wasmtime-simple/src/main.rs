@@ -1,4 +1,4 @@
-use wasm_simple::run_plugin;
+use wasmtime_simple::run_plugin;
 
 use std::{env, process};
 
@@ -17,6 +17,7 @@ fn main() {
     };
 
     if let Err(e) = run_plugin(&path) {
-        eprintln!("Error when running the plugin: {}", e)
+        eprintln!("Error when running the plugin: {}", e);
+        process::exit(1);
     }
 }

@@ -1,4 +1,4 @@
-use dynamic_simple::run_plugin;
+use wasm_simple::run_plugin;
 
 use std::{env, process};
 

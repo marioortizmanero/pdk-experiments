@@ -1,0 +1,12 @@
+[package]
+name = "wasmer-simple"
+version = "0.1.0"
+edition = "2018"
+
+[dependencies]
+common-ws = { path = "common", version = "0.1.0" }
+wasmer = "2.0.0"
+wasmer-wasi = "2.0.0"
+bincode = "1.3.3"
+serde = "1.0"
+typetag = "0.1"
