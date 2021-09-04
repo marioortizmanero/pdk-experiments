@@ -16,6 +16,28 @@ pub fn with_bindgen(a: i32, b: i32) -> i32 {
     a.min(b)
 }
 
+#[wasm_bindgen]
+#[derive(Copy, Clone, PartialEq, Eq)]
+pub enum Whatever {
+    A,
+    B
+}
+
+#[wasm_bindgen]
+pub struct Something { pub a: i32, pub b: Whatever }
+
+/// Using `wasm_bindgen` for more advanced types
+#[wasm_bindgen]
+pub fn does_this_work(a: Something) -> String {
+    if a.a == 123 {
+        String::from("if")
+    } else if a.b == Whatever::B {
+        String::from("else if")
+    } else {
+        String::from("else")
+    }
+}
+
 /*
 /// This is what the implementation of `with_extern_dyn` would look like if it
 /// was possible to import/export complex types.

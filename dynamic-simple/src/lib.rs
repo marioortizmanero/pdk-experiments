@@ -19,6 +19,7 @@ pub fn run_plugin(path: &str) -> Result<(), libloading::Error> {
         println!("  min(-10, 10): {}", min_extern(-10, 10));
         println!("  min(2000, 2000): {}", min_extern(2000, 2000));
 
+        /*
         println!("With extern + dyn:");
         // Sample implementor of the trait that's dynamically dispatched
         struct MinImplementor;
@@ -35,6 +36,7 @@ pub fn run_plugin(path: &str) -> Result<(), libloading::Error> {
             "  min(2000, 2000): {}",
             min_extern_dyn(&builder, 2000, 2000)
         );
+        */
     }
 
     Ok(())

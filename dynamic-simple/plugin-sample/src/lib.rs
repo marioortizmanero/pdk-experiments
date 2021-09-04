@@ -8,7 +8,7 @@ use common_ds::{MinFunction, MinBuilder};
 #[no_mangle]
 pub static with_static: MinFunction = min;
 
-fn min(a: i32, b: i32) -> i32 {
+pub extern "C" fn min(a: i32, b: i32) -> i32 {
     a.min(b)
 }
 
@@ -21,10 +21,11 @@ fn min(a: i32, b: i32) -> i32 {
 /// former makes more sense for Rust-to-Rust FFI because it's just simpler and
 /// more straightforward.
 #[no_mangle]
-pub fn with_extern(a: i32, b: i32) -> i32 {
+pub extern "C" fn with_extern(a: i32, b: i32) -> i32 {
     a.min(b)
 }
 
+/*
 /// Attempting to export a generic function in the shared library.
 ///
 /// Note that generic functions must be mangled, so trying to set `#[no_mangle]`
@@ -38,3 +39,4 @@ pub fn with_extern_generics<M: MinBuilder>(builder: M, a: i32, b: i32) -> i32 {
 pub fn with_extern_dyn(builder: &Box<dyn MinBuilder>, a: i32, b: i32) -> i32 {
     builder.min(a, b)
 }
+*/

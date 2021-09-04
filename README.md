@@ -13,7 +13,8 @@ The structure is usually the following:
   shared library and then loaded from the main binary.
 
 You have to build the main binary and the plugins separately. You can then load
-the plugin with the main binary and see what happens.
+the plugin with the main binary and see what happens. There's usually a
+`Makefile` that does everything for you, though.
 
 ## Benchmarking
 
