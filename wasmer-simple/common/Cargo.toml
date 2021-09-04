@@ -1,8 +1,6 @@
 [package]
-name = "common-ws"
+name = "common-wasmer"
 version = "0.1.0"
 edition = "2018"
 
 [dependencies]
-serde = "1.0"
-typetag = "0.1"

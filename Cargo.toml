@@ -5,4 +5,5 @@ edition = "2018"
 
 [dependencies]
 dynamic-simple = { path = "dynamic-simple", version = "0.1.0" }
-wasm-simple = { path = "wasm-simple", version = "0.1.0" }
+wasmer-simple = { path = "wasmer-simple", version = "0.1.0" }
+wasmtime-simple = { path = "wasmtime-simple", version = "0.1.0" }

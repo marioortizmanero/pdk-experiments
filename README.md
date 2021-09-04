@@ -20,5 +20,5 @@ the plugin with the main binary and see what happens. There's usually a
 
 The main crate in `src` includes some benchmarks that might be of interest. It
 requires a nightly compiler, and will work as long as the plugins are compiled
-in their `target` directories (see the READMEs of each sample for instructions).
-Remember to use `--release` when building both plugins.
+in their `target` directories. Remember to use `--release` when building the
+plugins.

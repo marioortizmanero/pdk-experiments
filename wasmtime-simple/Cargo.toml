@@ -4,5 +4,5 @@ version = "0.1.0"
 edition = "2018"
 
 [dependencies]
-common-ws = { path = "common", version = "0.1.0" }
+common-wasmtime = { path = "common", version = "0.1.0" }
 wasmtime = "0.29"

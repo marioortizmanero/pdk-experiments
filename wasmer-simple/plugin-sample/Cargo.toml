@@ -7,5 +7,4 @@ edition = "2018"
 crate-type = ["cdylib"]
 
 [dependencies]
-common-ws = { path = "../common", version = "0.1.0" }
-bincode = "1.3.3"
+common-wasmer = { path = "../common", version = "0.1.0" }

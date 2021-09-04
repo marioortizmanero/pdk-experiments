@@ -12,39 +12,32 @@ mod test {
         if !Path::new(path).exists() {
             panic!(
                 "The path '{}' doesn't exist. Make sure you've compiled the \
-                plugin before running the benchmarks.",
+                plugin before running the benchmarks. You can do that with \
+                `make release` in the repository directory",
                 path
             )
         }
     }
 
     const DYNAMIC_PATH: &str = "dynamic-simple/plugin-sample/target/release/libplugin_sample.so";
-    const WASM_PATH: &str =
-        "wasm-simple/plugin-sample/target/wasm32-unknown-unknown/release/plugin_sample.wasm";
+    const WASMER_PATH: &str = "wasmer-simple/plugin-sample/target/wasm32-wasi/release/plugin_sample.wasm";
+    const WASMTIME_PATH: &str = "wasmtime-simple/plugin-sample/target/wasm32-wasi/release/plugin_sample.wasm";
 
     #[bench]
-    fn dynamic_setup(bench: &mut Bencher) {
+    fn dynamic_simple(bench: &mut Bencher) {
         check_exists(DYNAMIC_PATH);
-        bench.iter(|| dynamic_bench::setup(WASM_PATH).unwrap())
+        bench.iter(|| dynamic_simple::run_plugin(DYNAMIC_PATH).unwrap())
     }
 
     #[bench]
-    fn dynamic_runtime(bench: &mut Bencher) {
-        check_exists(DYNAMIC_PATH);
-        let library = dynamic_bench::setup(WASM_PATH).unwrap();
-        bench.iter(|| dynamic_bench::run_plugin(library).unwrap())
+    fn wasmer_setup(bench: &mut Bencher) {
+        check_exists(WASMER_PATH);
+        bench.iter(|| wasmer_simple::run_plugin(WASMER_PATH).unwrap())
     }
 
     #[bench]
-    fn wasm_setup(bench: &mut Bencher) {
-        check_exists(WASM_PATH);
-        bench.iter(|| wasm_bench::setup(WASM_PATH).unwrap())
-    }
-
-    #[bench]
-    fn wasm_runtime(bench: &mut Bencher) {
-        check_exists(WASM_PATH);
-        let library = wasm_bench::setup(WASM_PATH).unwrap();
-        bench.iter(|| wasm_bench::run_plugin(library).unwrap())
+    fn wasmtime_setup(bench: &mut Bencher) {
+        check_exists(WASMTIME_PATH);
+        bench.iter(|| wasmer_simple::run_plugin(WASMTIME_PATH).unwrap())
     }
 }

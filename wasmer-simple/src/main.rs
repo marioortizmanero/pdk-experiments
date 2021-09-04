@@ -1,4 +1,4 @@
-use wasm_simple::run_plugin;
+use wasmer_simple::run_plugin;
 
 use std::{env, process};
 
