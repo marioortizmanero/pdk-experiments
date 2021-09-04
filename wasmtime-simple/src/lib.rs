@@ -23,4 +23,3 @@ pub fn run_plugin(path: &str) -> Result<(), Box<dyn Error>> {
 
     Ok(())
 }
-

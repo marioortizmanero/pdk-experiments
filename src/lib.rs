@@ -19,13 +19,17 @@ mod test {
         }
     }
 
-    const DYNAMIC_PATH: &str = "dynamic-simple/plugin-sample/target/release/libplugin_sample.so";
-    const WASMER_PATH: &str = "wasmer-simple/plugin-sample/target/wasm32-wasi/release/plugin_sample.wasm";
-    const WASMTIME_PATH: &str = "wasmtime-simple/plugin-sample/target/wasm32-wasi/release/plugin_sample.wasm";
-
     /*
      * TODO: make some examples specifically for benchmarking
      *
+     * These are not really fair, but it's interesting to see the difference.
+     * Note that it benchmarks both the initialization of the plugin and the
+     * runtime.
+     *
+
+    const DYNAMIC_PATH: &str = "dynamic-simple/plugin-sample/target/release/libplugin_sample.so";
+    const WASMER_PATH: &str = "wasmer-simple/plugin-sample/target/wasm32-wasi/release/plugin_sample.wasm";
+    const WASMTIME_PATH: &str = "wasmtime-simple/plugin-sample/target/wasm32-wasi/release/plugin_sample.wasm";
 
     #[bench]
     fn dynamic_simple(bench: &mut Bencher) {
