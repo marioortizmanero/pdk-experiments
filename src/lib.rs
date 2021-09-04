@@ -23,6 +23,10 @@ mod test {
     const WASMER_PATH: &str = "wasmer-simple/plugin-sample/target/wasm32-wasi/release/plugin_sample.wasm";
     const WASMTIME_PATH: &str = "wasmtime-simple/plugin-sample/target/wasm32-wasi/release/plugin_sample.wasm";
 
+    /*
+     * TODO: make some examples specifically for benchmarking
+     *
+
     #[bench]
     fn dynamic_simple(bench: &mut Bencher) {
         check_exists(DYNAMIC_PATH);
@@ -40,4 +44,5 @@ mod test {
         check_exists(WASMTIME_PATH);
         bench.iter(|| wasmer_simple::run_plugin(WASMTIME_PATH).unwrap())
     }
+    */
 }
