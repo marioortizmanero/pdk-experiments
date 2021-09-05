@@ -6,3 +6,4 @@ edition = "2018"
 [dependencies]
 common-ncodec = { path = "common", version = "0.1.0" }
 plugin-sample-ncodec = { path = "plugin-sample", version = "0.1.0" }
+anyhow = "1.0"

@@ -4,7 +4,7 @@ use abi_stable::{
 };
 
 #[no_mangle]
-pub static PLUGIN: CodecPlugin = CodecPlugin {
+pub static PLUGIN_DATA: CodecPlugin = CodecPlugin {
     plugin: Plugin {
         name: rstr!("json"),
         abi_stable_version: rstr!("TODO"),

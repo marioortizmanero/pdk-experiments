@@ -7,3 +7,5 @@ edition = "2018"
 dynamic-simple = { path = "dynamic-simple", version = "0.1.0" }
 wasmer-simple = { path = "wasmer-simple", version = "0.1.0" }
 wasmtime-simple = { path = "wasmtime-simple", version = "0.1.0" }
+dynamic-codec = { path = "dynamic-codec", version = "0.1.0" }
+native-codec = { path = "native-codec", version = "0.1.0" }
