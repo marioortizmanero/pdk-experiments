@@ -49,4 +49,16 @@ mod test {
         bench.iter(|| wasmer_simple::run_plugin(WASMTIME_PATH).unwrap())
     }
     */
+
+    #[bench]
+    fn dynamic_codec_setup(bench: &mut Bencher) {
+        check_exists(WASMTIME_PATH);
+        bench.iter(|| wasmer_simple::run_plugin(WASMTIME_PATH).unwrap())
+    }
+
+    #[bench]
+    fn native_codec_runtime(bench: &mut Bencher) {
+        check_exists(WASMTIME_PATH);
+        bench.iter(|| wasmer_simple::run_plugin(WASMTIME_PATH).unwrap())
+    }
 }
