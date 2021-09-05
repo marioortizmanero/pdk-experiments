@@ -9,7 +9,7 @@ debug:
 
 release:
 	cd plugin-sample && cargo build --target $(TARGET) --release
-	cargo run -- plugin-sample/target/$(TARGET)/release/plugin_sample.wasm
+	cargo run --release -- plugin-sample/target/$(TARGET)/release/plugin_sample.wasm
 
 clean:
 	rm -rf target common/target plugin-sample/target

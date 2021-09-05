@@ -8,7 +8,7 @@ debug:
 
 release:
 	cd plugin-sample && cargo build --release
-	cargo run -- plugin-sample/target/release/libplugin_sample.so
+	cargo run --release -- plugin-sample/target/release/libplugin_sample.so
 
 clean:
 	rm -rf target common/target plugin-sample/target
