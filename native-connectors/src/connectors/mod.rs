@@ -1,3 +1,14 @@
+pub mod metronome;
+
+// TODO make fields private and add some nice methods
+/// context for a source
+pub struct SourceContext {
+    /// connector uid
+    pub uid: u64,
+    /// connector url
+    pub url: TremorUrl,
+}
+
 /// A Connector connects the tremor runtime to the outside world.
 ///
 /// It can be a source of events, as such it is polled for new data.
@@ -43,10 +54,14 @@ pub trait Connector: Send {
     /// To notify the runtime of the main connectivity being lost, a `notifier` is passed in.
     /// Call `notifier.notify().await` as the last thing when you notice the connection is lost.
     /// This is well suited when handling the connection in another task.
+    ///
+    /// To know when to stop reading new data from the external connection, the `quiescence` beacon
+    /// can be used. Call `.reading()` and `.writing()` to see if you should continue doing so, if not, just stop and rest.
     async fn connect(
         &mut self,
         ctx: &ConnectorContext,
         notifier: reconnect::ConnectionLostNotifier,
+        quiescence: &QuiescenceBeacon,
     ) -> Result<bool>;
 
     /// called once when the connector is started
@@ -57,6 +72,13 @@ pub trait Connector: Send {
     async fn on_pause(&mut self, _ctx: &ConnectorContext) {}
     /// called when the connector resumes
     async fn on_resume(&mut self, _ctx: &ConnectorContext) {}
+
+    /// Drain
+    ///
+    /// Ensure no new events arrive at the source part of this connector when this function returns
+    /// So we can safely send the `Drain` signal.
+    async fn on_drain(&mut self, _ctx: &ConnectorContext) {}
+
     /// called when the connector is stopped
     async fn on_stop(&mut self, _ctx: &ConnectorContext) {}
 
