@@ -1,12 +1,35 @@
 pub mod metronome;
 
-// TODO make fields private and add some nice methods
-/// context for a source
-pub struct SourceContext {
-    /// connector uid
-    pub uid: u64,
-    /// connector url
-    pub url: TremorUrl,
+use serde::{Serialize, Deserialize};
+
+//// NOTE: the following types can be safely simplified for the example ////
+
+pub struct TremorUrl;
+pub struct SourceContext;
+pub struct SinkContext;
+pub struct ConnectorContext;
+mod reconnect {
+    pub struct ConnectionLostNotifier;
+}
+
+//// End of simplified types ////
+
+/// state of a connector
+#[derive(Debug, PartialEq, Serialize, Deserialize, Copy, Clone)]
+#[serde(rename_all = "lowercase")]
+pub enum ConnectorState {
+    /// connector has been initialized, but not yet started
+    Initialized,
+    /// connector is running
+    Running,
+    /// connector has been paused
+    Paused,
+    /// connector was stopped
+    Stopped,
+    /// Draining - getting rid of in-flight events and avoid emitting new ones
+    Draining,
+    /// connector failed to start
+    Failed,
 }
 
 /// A Connector connects the tremor runtime to the outside world.
