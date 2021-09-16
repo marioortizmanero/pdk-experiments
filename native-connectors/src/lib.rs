@@ -3,7 +3,7 @@ pub mod event;
 pub mod time;
 pub mod value;
 
-use connectors::metronome::{Builder, Metronome};
+use crate::{connectors::{metronome::{Builder, Metronome}, source::{SourceContext, SourceManagerBuilder}}, url::TremorUrl};
 
 use anyhow::Result;
 
@@ -25,8 +25,28 @@ pub mod errors {
 
 /// TODO document
 pub fn setup_plugin() -> impl Fn() -> Result<()> {
+    // TODO: for now should we use
+    // https://docs.rs/abi_stable/0.10.2/abi_stable/external_types/crossbeam_channel/index.html
+    // which is closer to what tremor actually uses (the only difference being
+    // that it's not asynchronous), or something simpler like callbacks?
     move || {
-        let conn = Builder::from_config();
+        // TODO: this uses `Box<dyn Connector>`, how can we make that work for
+        // dynamic loading?
+
+        // TODO: perhaps it would be better to initialize the metronome directly
+        // and use it as a connector or a source?
+        let metronome_builder = Builder::default();
+        let connector = metronome_builder.from_config(&TremorUrl, 100);
+
+        let source_builder = SourceManagerBuilder {
+            qsize: todo!(),
+            streams: todo!(),
+            source_metrics_reporter: todo!(),
+        };
+        let source = connector.create_source(SourceContext, source_builder).unwrap().unwrap();
+
+        source.
+
         /*
         println!("Running plugin {}", PLUGIN_DATA.plugin.name);
 

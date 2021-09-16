@@ -1,8 +1,23 @@
+use crate::{errors::Result, event::{EventPayload, Event, EventSerializer}};
+
 /// NOTE: simplification of the real type
 pub struct SinkContext;
 
 /// NOTE: simplification of the real type
 pub struct SinkManagerBuilder;
+
+/// NOTE: simplification of the real type
+pub struct SinkReply;
+
+/// Result for a sink function that may provide insights or response.
+///
+/// It can return None or Some(vec![]) if no insights/response were generated.
+///
+/// An insight is a contraflowevent containing control information for the runtime like
+/// circuit breaker events, guaranteed delivery events, etc.
+///
+/// A response is an event generated from the sink delivery.
+pub type ResultVec = Result<Vec<SinkReply>>;
 
 /// connector sink - receiving events
 #[async_trait::async_trait]

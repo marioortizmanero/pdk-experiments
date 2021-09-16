@@ -11,7 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-use crate::{connectors::prelude::*, time::nanotime, value::Value, DEFAULT_STREAM_ID};
+use crate::{connectors::prelude::*, time::nanotime, DEFAULT_STREAM_ID};
 use std::collections::HashMap;
 
 #[derive(Clone, Debug)]
@@ -21,11 +21,12 @@ pub struct Metronome {
     origin_uri: EventOriginUri,
 }
 
-/// NOTE: simplification of the real type
+/// NOTE: simplification of the real type. `ConnectorBuilder` was removed as a
+/// trait.
 #[derive(Debug, Default)]
 pub(crate) struct Builder {}
-impl ConnectorBuilder for Builder {
-    fn from_config(
+impl Builder {
+    pub fn from_config(
         &self,
         _id: &TremorUrl,
         interval: u64, // NOTE: simpler than `OpConfig`

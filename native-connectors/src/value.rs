@@ -1,3 +1,5 @@
+//! NOTE: unnecessary for now
+
 use std::borrow::Cow;
 use std::collections::HashMap;
 

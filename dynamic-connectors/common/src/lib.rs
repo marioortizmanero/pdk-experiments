@@ -31,6 +31,10 @@ macro_rules! define_plugin {
         // TODO: do we need to specify the kind of plugin in a string? or can we
         // just use an enum with data fields for now?
 
+        // TODO: research error handling, what happens if the plugin includes
+        // incorrect metadata? Can we avoid aborts? I should make more plugins
+        // with incorrect values to check that they don't crash the runtime.
+
         /// This may be checked before version mismatches, so it must use
         /// `*char`.
         #[no_mangle]

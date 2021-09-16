@@ -38,15 +38,6 @@ pub enum ConnectorState {
     Failed,
 }
 
-/// something that is able to create a connector instance
-pub trait ConnectorBuilder: Sync + Send {
-    /// create a connector from the given `id` and `config`
-    ///
-    /// # Errors
-    ///  * If the config is invalid for the connector
-    fn from_config(&self, id: &TremorUrl, config: &Option<OpConfig>) -> Result<Box<dyn Connector>>;
-}
-
 /// A Connector connects the tremor runtime to the outside world.
 ///
 /// It can be a source of events, as such it is polled for new data.

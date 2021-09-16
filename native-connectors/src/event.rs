@@ -1,6 +1,12 @@
 /// NOTE: simplification of the real type
 pub struct EventPayload;
 
+/// NOTE: simplification of the real type
+pub struct Event;
+
+/// NOTE: simplification of the real type
+pub struct EventSerializer;
+
 /// Event origin URI
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct EventOriginUri {

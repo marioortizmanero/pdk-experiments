@@ -96,6 +96,13 @@ pub trait Source: Send {
     }
 }
 
+/// address of a source
+#[derive(Clone, Debug)]
+pub struct SourceAddr {
+    /// the actual address
+    pub addr: Sender<SourceMsg>,
+}
+
 #[allow(clippy::module_name_repetitions)]
 pub struct SourceManagerBuilder {
     qsize: usize,
