@@ -1,8 +1,27 @@
-mod connectors;
+pub mod connectors;
+pub mod event;
+pub mod time;
+pub mod value;
 
-use connectors::metronome::{Metronome, Builder};
+use connectors::metronome::{Builder, Metronome};
 
 use anyhow::Result;
+
+/// default stream id if streams dont make sense
+pub const DEFAULT_STREAM_ID: u64 = 0;
+/// default pull id if pulls arent tracked
+pub const DEFAULT_PULL_ID: u64 = 0;
+
+pub mod url {
+    /// NOTE: simplification of the real type
+    pub struct TremorUrl;
+}
+pub mod errors {
+    /// NOTE: simplification of the real type
+    pub type Error = Box<dyn std::error::Error>;
+    pub struct ErrorKind;
+    pub type Result<T> = std::result::Result<T, Error>;
+}
 
 /// TODO document
 pub fn setup_plugin() -> impl Fn() -> Result<()> {

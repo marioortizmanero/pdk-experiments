@@ -11,17 +11,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-use crate::connectors::prelude::*;
-use tremor_common::time::nanotime;
-use tremor_script::literal;
-
-#[derive(Deserialize, Debug, Clone)]
-pub struct Config {
-    /// Interval in milliseconds
-    pub interval: u64,
-}
-
-impl ConfigImpl for Config {}
+use crate::{connectors::prelude::*, time::nanotime, value::Value, DEFAULT_STREAM_ID};
+use std::collections::HashMap;
 
 #[derive(Clone, Debug)]
 pub struct Metronome {
@@ -30,31 +21,27 @@ pub struct Metronome {
     origin_uri: EventOriginUri,
 }
 
+/// NOTE: simplification of the real type
 #[derive(Debug, Default)]
 pub(crate) struct Builder {}
 impl ConnectorBuilder for Builder {
     fn from_config(
         &self,
         _id: &TremorUrl,
-        raw_config: &Option<OpConfig>,
-    ) -> Result<Box<dyn Connector>> {
-        if let Some(raw) = raw_config {
-            let config = Config::new(raw)?;
-            let origin_uri = EventOriginUri {
-                scheme: "tremor-metronome".to_string(),
-                host: hostname(),
-                port: None,
-                path: vec![config.interval.to_string()],
-            };
+        interval: u64, // NOTE: simpler than `OpConfig`
+    ) -> Box<dyn Connector> {
+        let origin_uri = EventOriginUri {
+            scheme: "tremor-metronome".to_string(),
+            host: hostname(),
+            port: None,
+            path: vec![interval.to_string()],
+        };
 
-            Ok(Box::new(Metronome {
-                interval: config.interval,
-                next: 0,
-                origin_uri,
-            }))
-        } else {
-            Err(ErrorKind::MissingConfiguration(String::from("metronome")).into())
-        }
+        Box::new(Metronome {
+            interval,
+            next: 0,
+            origin_uri,
+        })
     }
 }
 
@@ -64,14 +51,14 @@ impl Source for Metronome {
         let now = nanotime();
         if self.next < now {
             self.next = now + self.interval;
-            let data = literal!({
-                "onramp": "metronome",
-                "ingest_ns": now,
-                "id": pull_id
-            });
+            // NOTE: removed the `literal` macro
+            let mut data = HashMap::new();
+            data.insert("onramp".to_string(), "metronome".to_string());
+            data.insert("ingest_ns".to_string(), now.to_string());
+            data.insert("id".to_string(), pull_id.to_string());
             Ok(SourceReply::Structured {
                 origin_uri: self.origin_uri.clone(),
-                payload: data.into(),
+                payload: data,
                 stream: DEFAULT_STREAM_ID,
             })
         } else {

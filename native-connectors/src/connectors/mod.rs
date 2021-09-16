@@ -1,18 +1,26 @@
 pub mod metronome;
+pub mod prelude;
+pub mod sink;
+pub mod source;
 
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
-//// NOTE: the following types can be safely simplified for the example ////
+use crate::{
+    connectors::{
+        sink::{SinkAddr, SinkContext, SinkManagerBuilder},
+        source::{SourceAddr, SourceContext, SourceManagerBuilder},
+    },
+    errors::Result,
+    url::TremorUrl,
+};
 
-pub struct TremorUrl;
-pub struct SourceContext;
-pub struct SinkContext;
-pub struct ConnectorContext;
-mod reconnect {
+pub mod reconnect {
+    /// NOTE: simplification of the real type
     pub struct ConnectionLostNotifier;
 }
 
-//// End of simplified types ////
+/// NOTE: simplification of the real type
+pub struct ConnectorContext;
 
 /// state of a connector
 #[derive(Debug, PartialEq, Serialize, Deserialize, Copy, Clone)]
@@ -26,10 +34,17 @@ pub enum ConnectorState {
     Paused,
     /// connector was stopped
     Stopped,
-    /// Draining - getting rid of in-flight events and avoid emitting new ones
-    Draining,
     /// connector failed to start
     Failed,
+}
+
+/// something that is able to create a connector instance
+pub trait ConnectorBuilder: Sync + Send {
+    /// create a connector from the given `id` and `config`
+    ///
+    /// # Errors
+    ///  * If the config is invalid for the connector
+    fn from_config(&self, id: &TremorUrl, config: &Option<OpConfig>) -> Result<Box<dyn Connector>>;
 }
 
 /// A Connector connects the tremor runtime to the outside world.
@@ -77,14 +92,10 @@ pub trait Connector: Send {
     /// To notify the runtime of the main connectivity being lost, a `notifier` is passed in.
     /// Call `notifier.notify().await` as the last thing when you notice the connection is lost.
     /// This is well suited when handling the connection in another task.
-    ///
-    /// To know when to stop reading new data from the external connection, the `quiescence` beacon
-    /// can be used. Call `.reading()` and `.writing()` to see if you should continue doing so, if not, just stop and rest.
     async fn connect(
         &mut self,
         ctx: &ConnectorContext,
         notifier: reconnect::ConnectionLostNotifier,
-        quiescence: &QuiescenceBeacon,
     ) -> Result<bool>;
 
     /// called once when the connector is started
@@ -95,13 +106,6 @@ pub trait Connector: Send {
     async fn on_pause(&mut self, _ctx: &ConnectorContext) {}
     /// called when the connector resumes
     async fn on_resume(&mut self, _ctx: &ConnectorContext) {}
-
-    /// Drain
-    ///
-    /// Ensure no new events arrive at the source part of this connector when this function returns
-    /// So we can safely send the `Drain` signal.
-    async fn on_drain(&mut self, _ctx: &ConnectorContext) {}
-
     /// called when the connector is stopped
     async fn on_stop(&mut self, _ctx: &ConnectorContext) {}
 
