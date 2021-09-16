@@ -1,24 +1,3 @@
-//! This defines the types that must be exported in a crate when creating a
-//! plugin.
-//!
-//! In order to load the plugin, one must ensure that the versions of this crate
-//! match for both the runtime and the plugin. Basic metadata such as versioning
-//! must be defined with fully stable types. For example, we can't use
-//! `abi_stable::RStr` to save the version; there might be a version mismatch of
-//! `abi_stable` between the crate and the plugin, and since this happens
-//! *before* making sure they're compatible, it may not work.
-//!
-//! All of this is simplified if the macro `define_plugin` is used.
-//!
-//! For now, the version checks are done for the entire crate for simplicity,
-//! but in the future we can make this more flexible. For instance, if a version
-//! bump in this crate only modifies structures for codec plugins, the rest of
-//! the plugins would still work. This would require versioning each of the
-//! types of plugins and bumping them as they're modified. Note that this is
-//! prone to human errors however, as it's a manual process.
-//!
-//! There may be helpful crates like https://github.com/doctorn/obake.
-
 use abi_stable::{RStr, RSlice, RSliceMut, RVec, ROption};
 
 // TODO: consider all possible syntaxes for this macro, take into account that

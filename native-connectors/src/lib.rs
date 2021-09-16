@@ -35,6 +35,8 @@ pub fn setup_plugin() -> impl Fn() -> Result<()> {
 
         // TODO: perhaps it would be better to initialize the metronome directly
         // and use it as a connector or a source?
+        //
+        // I should remove the `async` parts first of all
         let metronome_builder = Builder::default();
         let connector = metronome_builder.from_config(&TremorUrl, 100);
 
@@ -43,7 +45,7 @@ pub fn setup_plugin() -> impl Fn() -> Result<()> {
             streams: todo!(),
             source_metrics_reporter: todo!(),
         };
-        let source = connector.create_source(SourceContext, source_builder).unwrap().unwrap();
+        let source = connector.create_source(SourceContext, source_builder).await.unwrap().unwrap();
 
         source.
 
