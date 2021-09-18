@@ -56,18 +56,21 @@ pub fn setup_plugin(path: &str) -> Result<impl Fn() -> Result<()>> {
         }
 
         let kind = get_str(&library, interface::KIND_IDENT)?;
-        match kind {
-            "connector" => {
-                let data = library.get::<*const ConnectorPlugin>(interface::DATA_IDENT)?.read();
-                println!("Plugin data: {:?}", data);
-
-            },
-            _ => return Err(Error::UnknownKind(kind.to_owned()).into())
+        // This would match agains every possible kind of plugin and load it. In
+        // this case we only support connectors, though, so we just have an
+        // early return.
+        if kind != "connector" {
+            return Err(Error::UnknownKind(kind.to_owned()).into());
         }
 
+        let data = library.get::<*const ConnectorPlugin>(interface::DATA_IDENT)?.read();
+        println!("Plugin data: {:?}", data);
+
+        // TODO: How to deal with lifetimes? We want to avoid the library from
+        // being dropped. We also want to be able to call this function multiple
+        // times, and concurrently, for the tests.
         Ok(move || {
             println!("Running plugin");
-            // TODO
 
             Ok(())
         })
