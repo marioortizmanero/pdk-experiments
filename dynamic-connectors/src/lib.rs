@@ -1,9 +1,6 @@
 use common_dconnectors::{interface, ConnectorPlugin};
 
-use std::{
-    os::raw::c_char,
-    ffi::CStr
-};
+use std::{ffi::CStr, os::raw::c_char};
 
 use anyhow::Result;
 use libloading::Library;
@@ -15,7 +12,7 @@ enum Error {
     #[error("version mismatch: {0} incompatible with {1}")]
     VersionMismatch(String, String),
     #[error("unknown kind of plugin: {0}")]
-    UnknownKind(String)
+    UnknownKind(String),
 }
 
 // This may be more advanced in the future. If semantic versioning is strictly
@@ -27,7 +24,7 @@ fn version_matches(version: &str) -> bool {
 unsafe fn get_str<'a>(library: &'a Library, ident: &[u8]) -> Result<&'a str> {
     // First, the string exported by the plugin is read. For FFI-safety and
     // thread-safety, this must be a function that returns `*const c_char`.
-    let name_fn = library.get::<extern fn() -> *const c_char>(ident)?;
+    let name_fn = library.get::<extern "C" fn() -> *const c_char>(ident)?;
     let name: *const c_char = name_fn();
 
     // Unfortunately there is no way to make sure this part is safe. We have
@@ -63,7 +60,9 @@ pub fn setup_plugin(path: &str) -> Result<impl Fn() -> Result<()>> {
             return Err(Error::UnknownKind(kind.to_owned()).into());
         }
 
-        let data = library.get::<*const ConnectorPlugin>(interface::DATA_IDENT)?.read();
+        let data = library
+            .get::<*const ConnectorPlugin>(interface::DATA_IDENT)?
+            .read();
         println!("Plugin data: {:?}", data);
 
         // TODO: How to deal with lifetimes? We want to avoid the library from
