@@ -9,3 +9,4 @@ The following plugins have been implemented for now:
 * `plugin-missing`: invalid plugin, will be handled gracefully
 * `plugin-versionmismatch`: invalid plugin, will be handled gracefully
 * `plugin-wrongtype`: invalid plugin, will crash
+* `plugin-wrongaddress`: invalid plugin, will crash

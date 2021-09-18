@@ -1,5 +1,7 @@
-// This will fail because the name has the wrong type, but the runtime should
-// keep running and end gracefully. This should not actually happen if the macro
+// This will crash because the name has the wrong type, and the runtime assumes
+// the types are valid. This should not actually happen if the macro
 // `define_plugin` is used.
 #[no_mangle]
-pub static PLUGIN_NAME: i32 = 1234;
+pub extern "C" fn get_name() -> i32 {
+    1234
+}

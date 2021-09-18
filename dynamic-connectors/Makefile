@@ -4,6 +4,7 @@
 	debug-versionmismatch release-versionmismatch \
 	debug-wrongtype release-wrongtype \
 	debug-missing release-missing \
+	debug-wrongaddress release-wrongaddress \
 	debug release clean
 
 debug-metronome:
@@ -33,6 +34,13 @@ debug-missing:
 release-missing:
 	cd plugin-missing && cargo build --release
 	cargo run --release -- plugin-missing/target/release/libplugin_missing.so
+
+debug-wrongaddress:
+	cd plugin-wrongaddress && cargo build
+	cargo run -- plugin-wrongaddress/target/debug/libplugin_wrongaddress.so
+release-wrongaddress:
+	cd plugin-wrongaddress && cargo build --release
+	cargo run --release -- plugin-wrongaddress/target/release/libplugin_wrongaddress.so
 
 debug: debug-metronome
 release: release-metronome

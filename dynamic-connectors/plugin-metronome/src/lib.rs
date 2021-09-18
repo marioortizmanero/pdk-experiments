@@ -1,4 +1,4 @@
-use common_dconnectors::{ConnectorPlugin, define_connector_plugin};
+use common_dconnectors::{define_connector_plugin, ConnectorPlugin};
 
 use abi_stable::{rslice, rstr, std_types::RSliceMut};
 
@@ -12,6 +12,6 @@ define_connector_plugin! {
     }
 }
 
-unsafe extern fn metronome<'input>(_data: RSliceMut<'input, u8>) -> i32 {
+unsafe extern "C" fn metronome<'input>(_data: RSliceMut<'input, u8>) -> i32 {
     1234
 }
