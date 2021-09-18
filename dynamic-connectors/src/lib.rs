@@ -24,43 +24,38 @@ fn version_matches(version: &str) -> bool {
     version == PKG_VERSION
 }
 
+unsafe fn get_str<'a>(library: &'a Library, ident: &[u8]) -> Result<&'a str> {
+    // First, the string exported by the plugin is read. For FFI-safety and
+    // thread-safety, this must be a function that returns `*const c_char`.
+    let name_fn = library.get::<extern fn() -> *const c_char>(ident)?;
+    let name: *const c_char = name_fn();
+
+    // Unfortunately there is no way to make sure this part is safe. We have
+    // to assume the address exported by the plugin is valid. Otherwise,
+    // this part may cause an abort.
+    let name = CStr::from_ptr(name);
+
+    // Finally, the string is converted to UTF-8 and returned
+    Ok(name.to_str()?)
+}
+
 // TODO: docs
 pub fn setup_plugin(path: &str) -> Result<impl Fn() -> Result<()>> {
     unsafe {
         let library = Library::new(path)?;
 
-        // First, the string exported by the plugin is read. For FFI-safety and
-        // thread-safety, this must be a function that returns `*const c_char`.
-        let name_fn = library.get::<interface::NameFn>(interface::NAME_IDENT)?;
-        let name: *const c_char = name_fn();
-        // Unfortunately there is no way to make sure this part is safe. We have
-        // to assume the address exported by the plugin is valid. Otherwise,
-        // this part may cause an abort.
-        let name = CStr::from_ptr(name);
-        // Then, the string is converted to UTF-8.
-        let name = name.to_str()?;
-
+        let name = get_str(&library, interface::NAME_IDENT)?;
         // TODO: use `log`
         println!("Initializing plugin {}", name);
 
-        // The same process is applied to the version string.
-        let version_fn = library.get::<interface::CommonVersionFn>(interface::COMMON_VERSION_IDENT)?;
-        let version = version_fn();
-        let version = CStr::from_ptr(version);
-        let version = version.to_str()?;
-
         // Making sure we can continue loading data
+        let version = get_str(&library, interface::COMMON_VERSION_IDENT)?;
         if !version_matches(version) {
             println!("Version mismatch. Aborting.");
             return Err(Error::VersionMismatch(version.to_owned(), PKG_VERSION.to_owned()).into());
         }
 
-        // And to the kind of plugin we're loading
-        let kind_fn = library.get::<interface::KindFn>(interface::KIND_IDENT)?;
-        let kind = kind_fn();
-        let kind = CStr::from_ptr(kind);
-        let kind = kind.to_str()?;
-
+        let kind = get_str(&library, interface::KIND_IDENT)?;
         match kind {
             "connector" => {
                 let data = library.get::<*const ConnectorPlugin>(interface::DATA_IDENT)?.read();

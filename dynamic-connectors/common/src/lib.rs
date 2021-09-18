@@ -3,17 +3,9 @@ use abi_stable::std_types::{RStr, RSlice, RSliceMut};
 /// These are the identifiers and types that should be used between the plugin
 /// and runtime to import and export functionality.
 pub mod interface {
-    use std::os::raw::c_char;
-
     pub const NAME_IDENT: &[u8] = b"get_name";
-    pub type NameFn = extern fn() -> *const c_char;
-
     pub const COMMON_VERSION_IDENT: &[u8] = b"get_version";
-    pub type CommonVersionFn = extern fn() -> *const c_char;
-
     pub const KIND_IDENT: &[u8] = b"get_kind";
-    pub type KindFn = extern fn() -> *const c_char;
-
     pub const DATA_IDENT: &[u8] = b"PLUGIN_DATA";
 }
 
