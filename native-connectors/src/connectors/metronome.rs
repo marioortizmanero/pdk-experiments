@@ -46,9 +46,8 @@ impl Builder {
     }
 }
 
-#[async_trait::async_trait()]
 impl Source for Metronome {
-    async fn pull_data(&mut self, pull_id: u64, _ctx: &SourceContext) -> Result<SourceReply> {
+    fn pull_data(&mut self, pull_id: u64, _ctx: &SourceContext) -> Result<SourceReply> {
         let now = nanotime();
         if self.next < now {
             self.next = now + self.interval;
@@ -71,9 +70,8 @@ impl Source for Metronome {
         false
     }
 }
-#[async_trait::async_trait()]
 impl Connector for Metronome {
-    async fn connect(
+    /* async */ fn connect(
         &mut self,
         _ctx: &ConnectorContext,
         _notifier: super::reconnect::ConnectionLostNotifier,
@@ -81,7 +79,7 @@ impl Connector for Metronome {
         Ok(true)
     }
 
-    async fn on_start(&mut self, _ctx: &ConnectorContext) -> Result<ConnectorState> {
+    /* async */ fn on_start(&mut self, _ctx: &ConnectorContext) -> Result<ConnectorState> {
         Ok(ConnectorState::Running)
     }
 
@@ -89,7 +87,7 @@ impl Connector for Metronome {
         "json"
     }
 
-    async fn create_source(
+    /* async */ fn create_source(
         &mut self,
         source_context: SourceContext,
         builder: super::source::SourceManagerBuilder,

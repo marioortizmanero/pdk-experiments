@@ -50,13 +50,12 @@ pub enum ConnectorState {
 /// It is a meta entity on top of the sink and source part.
 /// The connector has its own control plane and is an artefact in the tremor repository.
 /// It controls the sink and source parts which are connected to the rest of the runtime via links to pipelines.
-#[async_trait::async_trait]
 pub trait Connector: Send {
     /// create a source part for this connector if applicable
     ///
     /// This function is called exactly once upon connector creation.
     /// If this connector does not act as a source, return `Ok(None)`.
-    async fn create_source(
+    /* async */ fn create_source(
         &mut self,
         _source_context: SourceContext,
         _builder: source::SourceManagerBuilder,
@@ -68,7 +67,7 @@ pub trait Connector: Send {
     ///
     /// This function is called exactly once upon connector creation.
     /// If this connector does not act as a sink, return `Ok(None)`.
-    async fn create_sink(
+    /* async */ fn create_sink(
         &mut self,
         _sink_context: SinkContext,
         _builder: sink::SinkManagerBuilder,
@@ -83,7 +82,7 @@ pub trait Connector: Send {
     /// To notify the runtime of the main connectivity being lost, a `notifier` is passed in.
     /// Call `notifier.notify().await` as the last thing when you notice the connection is lost.
     /// This is well suited when handling the connection in another task.
-    async fn connect(
+    /* async */ fn connect(
         &mut self,
         ctx: &ConnectorContext,
         notifier: reconnect::ConnectionLostNotifier,
@@ -91,14 +90,14 @@ pub trait Connector: Send {
 
     /// called once when the connector is started
     /// `connect` will be called after this for the first time, leave connection attempts in `connect`.
-    async fn on_start(&mut self, ctx: &ConnectorContext) -> Result<ConnectorState>;
+    /* async */ fn on_start(&mut self, ctx: &ConnectorContext) -> Result<ConnectorState>;
 
     /// called when the connector pauses
-    async fn on_pause(&mut self, _ctx: &ConnectorContext) {}
+    /* async */ fn on_pause(&mut self, _ctx: &ConnectorContext) {}
     /// called when the connector resumes
-    async fn on_resume(&mut self, _ctx: &ConnectorContext) {}
+    /* async */ fn on_resume(&mut self, _ctx: &ConnectorContext) {}
     /// called when the connector is stopped
-    async fn on_stop(&mut self, _ctx: &ConnectorContext) {}
+    /* async */ fn on_stop(&mut self, _ctx: &ConnectorContext) {}
 
     /// returns the default codec for this connector
     fn default_codec(&self) -> &str;

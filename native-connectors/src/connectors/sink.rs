@@ -20,10 +20,9 @@ pub struct SinkReply;
 pub type ResultVec = Result<Vec<SinkReply>>;
 
 /// connector sink - receiving events
-#[async_trait::async_trait]
 pub trait Sink: Send {
     /// called when receiving an event
-    async fn on_event(
+    /* async */ fn on_event(
         &mut self,
         input: &str,
         event: Event,
@@ -32,7 +31,7 @@ pub trait Sink: Send {
         start: u64,
     ) -> ResultVec;
     /// called when receiving a signal
-    async fn on_signal(
+    /* async */ fn on_signal(
         &mut self,
         _signal: Event,
         _ctx: &SinkContext,
@@ -48,19 +47,19 @@ pub trait Sink: Send {
 
     // lifecycle stuff
     /// called when started
-    async fn on_start(&mut self, _ctx: &mut SinkContext) {}
+    /* async */ fn on_start(&mut self, _ctx: &mut SinkContext) {}
     /// called when paused
-    async fn on_pause(&mut self, _ctx: &mut SinkContext) {}
+    /* async */ fn on_pause(&mut self, _ctx: &mut SinkContext) {}
     /// called when resumed
-    async fn on_resume(&mut self, _ctx: &mut SinkContext) {}
+    /* async */ fn on_resume(&mut self, _ctx: &mut SinkContext) {}
     /// called when stopped
-    async fn on_stop(&mut self, _ctx: &mut SinkContext) {}
+    /* async */ fn on_stop(&mut self, _ctx: &mut SinkContext) {}
 
     // connectivity stuff
     /// called when sink lost connectivity
-    async fn on_connection_lost(&mut self, _ctx: &mut SinkContext) {}
+    /* async */ fn on_connection_lost(&mut self, _ctx: &mut SinkContext) {}
     /// called when sink re-established connectivity
-    async fn on_connection_established(&mut self, _ctx: &mut SinkContext) {}
+    /* async */ fn on_connection_established(&mut self, _ctx: &mut SinkContext) {}
 
     /// if `true` events are acknowledged/failed automatically by the sink manager.
     /// Such sinks should return SinkReply::None from on_event or SinkReply::Fail if they fail immediately.

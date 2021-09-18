@@ -35,8 +35,11 @@ pub fn setup_plugin() -> impl Fn() -> Result<()> {
 
         // TODO: perhaps it would be better to initialize the metronome directly
         // and use it as a connector or a source?
-        //
-        // I should remove the `async` parts first of all
+
+        // For this example we skip the whole concept of `World` and `Manager`.
+        // This acts directy as a `connectors::Manager`, which initializes and
+        // runs a list of known actions over a single connector (instead of
+        // multiple of them, for simplicity as well).
         let metronome_builder = Builder::default();
         let connector = metronome_builder.from_config(&TremorUrl, 100);
 
@@ -45,9 +48,9 @@ pub fn setup_plugin() -> impl Fn() -> Result<()> {
             streams: todo!(),
             source_metrics_reporter: todo!(),
         };
-        let source = connector.create_source(SourceContext, source_builder).await.unwrap().unwrap();
+        let source = connector.create_source(SourceContext, source_builder).unwrap().unwrap();
 
-        source.
+        // source.
 
         /*
         println!("Running plugin {}", PLUGIN_DATA.plugin.name);
