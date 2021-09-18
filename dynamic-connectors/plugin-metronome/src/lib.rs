@@ -1,12 +1,12 @@
-use common_dconnectors::{PluginData, define_plugin};
+use common_dconnectors::{ConnectorPlugin, define_connector_plugin};
 
 use abi_stable::{rslice, rstr, std_types::RSliceMut};
 
 // TODO
 
-define_plugin! {
+define_connector_plugin! {
     name: "metronome",
-    data: PluginData::Connector {
+    data: ConnectorPlugin {
         something: metronome,
         mime_types: rslice![rstr!("json")]
     }
