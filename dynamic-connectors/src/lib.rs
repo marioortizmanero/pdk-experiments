@@ -1,6 +1,6 @@
 use common_dconnectors::{interface, ConnectorPlugin};
 
-use std::{ffi::CStr, os::raw::c_char};
+use std::{ffi::{CStr, OsStr}, fs, io, os::raw::c_char, path::{Path, PathBuf}};
 
 use anyhow::Result;
 use libloading::Library;
@@ -13,12 +13,60 @@ enum Error {
     VersionMismatch(String, String),
     #[error("unknown kind of plugin: {0}")]
     UnknownPluginKind(String),
+    #[error("input/output: {0}")]
+    Io(#[from] io::Error)
 }
 
-// This may be more advanced in the future. If semantic versioning is strictly
-// followed in Tremor, we could ignore minor or patch upgrades.
+/// This may be more advanced in the future. If semantic versioning is strictly
+/// followed in Tremor, we could ignore minor or patch upgrades.
 fn version_matches(version: &str) -> bool {
     version == PKG_VERSION
+}
+
+// TODO: how should we handle extensions? Should we use a single one such as
+// `.module`, or `.tremorplugin`, or platform-dependent ones such as `.dll`,
+// `.so` and `.mod`?
+//
+// Using a single one could be easier to distribute but then we might run into
+// problems if a plugin isn't cross-platform. For example, a dev could create a
+// plugin that's only available for Windows, but since it's using the same
+// extension, Tremor would attempt to load it on other platforms such as Linux.
+fn extension_matches(file: &Path) -> bool {
+    match file.extension() {
+        Some(ext) => true,
+        _ => false
+    }
+
+    if cfg!(linux) {
+        "so"
+    } else if cfg!(windows) {
+        "dll"
+    } else if cfg!(darwin) {
+        "mod"
+    }
+}
+
+// TODO: how should we look for plugins? can we do it recursively or could this
+// crash (e.g. the user selects `/` as the path)?
+/// Recursively looks for plugins in a directory
+fn find_plugins<P, S>(dir: P) -> Result<impl IntoIterator<Item = S>>
+    where
+        P: AsRef<Path>,
+        S: AsRef<PathBuf>
+{
+    // TODO
+    if dir.is_dir() {
+        fs::read_dir(dir)?
+            .map(|node| node.map(|node| node.path()
+        for entry in fs::read_dir(dir)? {
+            let entry = entry?;
+            let path = entry.path();
+            if path.is_dir() {
+                find_plugins(&path)?;
+            }
+        }
+    }
+    Ok(())
 }
 
 unsafe fn get_str<'a>(library: &'a Library, ident: &[u8]) -> Result<&'a str> {
