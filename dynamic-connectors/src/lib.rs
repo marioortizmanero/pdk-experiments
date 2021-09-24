@@ -12,7 +12,7 @@ enum Error {
     #[error("version mismatch: {0} incompatible with {1}")]
     VersionMismatch(String, String),
     #[error("unknown kind of plugin: {0}")]
-    UnknownKind(String),
+    UnknownPluginKind(String),
 }
 
 // This may be more advanced in the future. If semantic versioning is strictly
@@ -53,11 +53,11 @@ pub fn setup_plugin(path: &str) -> Result<impl Fn() -> Result<()>> {
         }
 
         let kind = get_str(&library, interface::KIND_IDENT)?;
-        // This would match agains every possible kind of plugin and load it. In
-        // this case we only support connectors, though, so we just have an
+        // This would match against every possible kind of plugin and load it.
+        // In this case we only support connectors, though, so we just have an
         // early return.
         if kind != "connector" {
-            return Err(Error::UnknownKind(kind.to_owned()).into());
+            return Err(Error::UnknownPluginKind(kind.to_owned()).into());
         }
 
         let data = library
