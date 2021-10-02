@@ -1,10 +1,9 @@
 [package]
-name = "dynamic_abi_stable"
+name = "dynamic_sabi"
 version = "0.1.0"
 edition = "2018"
 
 [dependencies]
-libloading = "0.7"
 anyhow = "1.0"
-
+common-dsabi = { version = "0.1.0", path = "common" }
 abi_stable = "0.9"

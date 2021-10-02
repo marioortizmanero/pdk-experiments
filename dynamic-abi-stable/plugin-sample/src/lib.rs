@@ -1,30 +1,29 @@
-use abi_stable::{rstr, std_types::RStr, StableAbi};
+use abi_stable::{export_root_module, sabi_extern_fn, prefix_type::PrefixTypeTrait};
 
-/// This is the struct that's passed to the functions in the module.
-#[repr(C)]
-#[derive(StableAbi)]
-pub struct State {
+use common_dsabi::{MinMod, MinMod_Ref, State};
+
+/// Exports the root module of this library.
+///
+/// This code isn't run until the layout of the type it returns is checked.
+#[export_root_module]
+fn instantiate_root_module() -> MinMod_Ref {
+    MinMod {
+        new,
+        min
+    }
+    .leak_into_prefix() // Converts the `MinMod` into `MinMod_Ref` and leaks it
 }
 
-// Using the stable C ABI
-#[repr(C)]
-// Deriving the `StableAbi` trait, which defines the layout of the struct at
-// compile-time.
-#[derive(StableAbi)]
-// Marking the struct as a prefix-type.
-#[sabi(kind(prefix_ref))]
-pub struct MinMod {
-    /// Initializes the state, which will be passed to the functions in this
-    /// module.
-    pub new: extern "C" fn() -> State,
-
-    /// Reverses the order of the lines.
-    pub min: extern "C" fn(&mut TOStateBox,RStr<'_>) -> RString,
- 
-    pub run_command: 
-        extern "C" fn(&mut TOStateBox,command:TOCommandBox<'static>)->TOReturnValueArc,
+// TODO: research "erasing"
+#[sabi_extern_fn]
+pub fn new() -> State {
+    State {
+        counter: 0
+    }
 }
 
-/// This symbol is exported using `abi_stable` v0.9
-#[no_mangle]
-pub static SHARED: RStr = rstr!("hello");
+#[sabi_extern_fn]
+pub fn min(state: &mut State, a: i32, b: i32) -> i32 {
+    state.counter += 1;
+    a.min(b)
+}

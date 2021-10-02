@@ -1,4 +1,4 @@
-use abi_stable_mismatch::run_plugin;
+use dynamic_sabi::run_plugin;
 
 use std::{env, process};
 
