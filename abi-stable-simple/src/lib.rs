@@ -1,5 +1,5 @@
 use abi_stable::library::RootModule;
-use common_dsabi::MinMod_Ref;
+use common_sabi_simple::MinMod_Ref;
 use anyhow::{Result, anyhow};
 
 pub fn run_plugin(path: &str) -> Result<()> {

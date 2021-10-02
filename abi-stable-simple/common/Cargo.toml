@@ -1,5 +1,5 @@
 [package]
-name = "common-dsabi"
+name = "common-sabi-simple"
 version = "0.1.0"
 edition = "2018"
 

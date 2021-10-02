@@ -1,5 +1,5 @@
 [package]
-name = "plugin-sample"
+name = "plugin-panic"
 version = "0.1.0"
 edition = "2018"
 
@@ -12,4 +12,4 @@ crate-type = ["cdylib"]
 
 [dependencies]
 abi_stable = "0.9"
-common-dsabi = { version = "0.1.0", path = "../common" }
+common-sabi-simple = { version = "0.1.0", path = "../common" }

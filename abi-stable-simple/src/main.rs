@@ -1,4 +1,4 @@
-use dynamic_sabi::run_plugin;
+use sabi_simple::run_plugin;
 
 use std::{env, process};
 
