@@ -32,7 +32,8 @@ macro_rules! internal_define_plugin {
         // For the version we use a string ("0.1.0") rather than a tuple of
         // integers such as `(0, 1, 0)`. Even though the latter works perfectly
         // for semantic versioning, it doesn't work with development versioning
-        // ("master-2bb58f4") and more complex variations.
+        // ("master-2bb58f4") and more complex variations (we'll just keept it
+        // simple for now).
         const __VERSION: &str = concat!(env!("CARGO_PKG_VERSION"), "\0");
 
         #[no_mangle]
@@ -77,11 +78,21 @@ macro_rules! define_connector_plugin {
     };
 }
 
-// TODO
-
+/// This contains the data about the plugin
 #[repr(C)]
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct ConnectorPlugin<'input> {
     pub mime_types: RSlice<'static, RStr<'static>>,
-    pub something: unsafe extern "C" fn(data: RSliceMut<'input, u8>) -> i32,
+    // Initializes the plugin by creating a new state
+    pub new: unsafe extern "C" fn() -> ConnectorState,
+    // A stub function exported by the connector
+    pub some_function: unsafe extern "C" fn(state: &mut ConnectorState, data: RSliceMut<'input, u8>) -> i32,
+}
+
+// TODO: every connector should have a different state declaration
+// This contains the internal state for the connectors
+#[repr(C)]
+#[derive(Debug, Clone)]
+pub struct ConnectorState {
+    counter: i32
 }

@@ -1,9 +1,9 @@
-use dynamic_connectors::setup_plugin;
+use dynamic_connectors::{setup_plugin, find_plugins};
 
 use std::{env, process};
 
 fn usage() {
-    println!("Usage: ./main PLUGIN_PATH");
+    println!("Usage: ./main PLUGINS_DIR");
 }
 
 fn main() {
@@ -16,16 +16,18 @@ fn main() {
         }
     };
 
-    let run_plugin = match setup_plugin(&path) {
-        Ok(f) => f,
-        Err(e) => {
-            eprintln!("Error when setting up the plugin: {}", e);
+    for plugin in find_plugins(&path) {
+        let run_plugin = match setup_plugin(&plugin) {
+            Ok(f) => f,
+            Err(e) => {
+                eprintln!("Error when setting up the plugin: {}", e);
+                process::exit(1);
+            }
+        };
+
+        if let Err(e) = run_plugin() {
+            eprintln!("Error when running the plugin: {}", e);
             process::exit(1);
         }
-    };
-
-    if let Err(e) = run_plugin() {
-        eprintln!("Error when running the plugin: {}", e);
-        process::exit(1);
     }
 }

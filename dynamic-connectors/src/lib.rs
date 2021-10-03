@@ -14,61 +14,40 @@ enum Error {
     #[error("unknown kind of plugin: {0}")]
     UnknownPluginKind(String),
     #[error("input/output: {0}")]
-    Io(#[from] io::Error)
+    Io(#[from] io::Error),
+    #[error("invalid path: {0}")]
+    Path(String)
 }
 
-/// This may be more advanced in the future. If semantic versioning is strictly
-/// followed in Tremor, we could ignore minor or patch upgrades.
+/// Versions are compatible only if they fully match.
 fn version_matches(version: &str) -> bool {
     version == PKG_VERSION
 }
 
-// TODO: how should we handle extensions? Should we use a single one such as
-// `.module`, or `.tremorplugin`, or platform-dependent ones such as `.dll`,
-// `.so` and `.mod`?
-//
-// Using a single one could be easier to distribute but then we might run into
-// problems if a plugin isn't cross-platform. For example, a dev could create a
-// plugin that's only available for Windows, but since it's using the same
-// extension, Tremor would attempt to load it on other platforms such as Linux.
+/// We just check the extension depending on the Operating System.
 fn extension_matches(file: &Path) -> bool {
-    match file.extension() {
-        Some(ext) => true,
-        _ => false
-    }
-
-    if cfg!(linux) {
-        "so"
-    } else if cfg!(windows) {
-        "dll"
-    } else if cfg!(darwin) {
-        "mod"
-    }
+    file
+        .extension()
+        .map(|ext| ext == std::env::consts::DLL_EXTENSION)
+        .unwrap_or(false)
 }
 
-// TODO: how should we look for plugins? can we do it recursively or could this
-// crash (e.g. the user selects `/` as the path)?
-/// Recursively looks for plugins in a directory
-fn find_plugins<P, S>(dir: P) -> Result<impl IntoIterator<Item = S>>
+/// The runtime looks for plugins in a directory non-recursively
+pub fn find_plugins<P>(dir: P) -> Result<impl IntoIterator<Item = PathBuf>>
     where
         P: AsRef<Path>,
-        S: AsRef<PathBuf>
 {
-    // TODO
-    if dir.is_dir() {
-        fs::read_dir(dir)?
-            .map(|node| node.map(|node| node.path()
-        for entry in fs::read_dir(dir)? {
-            let entry = entry?;
-            let path = entry.path();
-            if path.is_dir() {
-                find_plugins(&path)?;
-            }
-        }
+    if !dir.as_ref().is_dir() {
+        return Err(Error::Path("not a directory".to_owned()).into());
     }
-    Ok(())
+
+    let iter = fs::read_dir(dir)?
+        .filter_map(|node| Some(node.ok()?.path()))
+        .filter(|path| extension_matches(&path));
+    Ok(iter)
 }
 
+/// Obtaining a string from the metadata of the library.
 unsafe fn get_str<'a>(library: &'a Library, ident: &[u8]) -> Result<&'a str> {
     // First, the string exported by the plugin is read. For FFI-safety and
     // thread-safety, this must be a function that returns `*const c_char`.
@@ -84,7 +63,9 @@ unsafe fn get_str<'a>(library: &'a Library, ident: &[u8]) -> Result<&'a str> {
     Ok(name.to_str()?)
 }
 
-// TODO: docs
+/// For benchmarking reasons, setting up the plugin and running it is a two step
+/// process. Thus, the setup is done when calling this function, and it can be
+/// ran when calling the returned closure.
 pub fn setup_plugin(path: &str) -> Result<impl Fn() -> Result<()>> {
     unsafe {
         let library = Library::new(path)?;

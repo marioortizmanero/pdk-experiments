@@ -2,8 +2,6 @@ use common_dconnectors::{define_connector_plugin, ConnectorPlugin};
 
 use abi_stable::{rslice, rstr, std_types::RSliceMut};
 
-// TODO
-
 define_connector_plugin! {
     name: "metronome",
     data: ConnectorPlugin {
