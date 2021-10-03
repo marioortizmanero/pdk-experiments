@@ -1,6 +1,11 @@
 use common_dconnectors::{interface, ConnectorPlugin};
 
-use std::{ffi::{CStr, OsStr}, fs, io, os::raw::c_char, path::{Path, PathBuf}};
+use std::{
+    ffi::CStr,
+    fs, io,
+    os::raw::c_char,
+    path::{Path, PathBuf},
+};
 
 use anyhow::Result;
 use libloading::Library;
@@ -16,7 +21,7 @@ enum Error {
     #[error("input/output: {0}")]
     Io(#[from] io::Error),
     #[error("invalid path: {0}")]
-    Path(String)
+    Path(String),
 }
 
 /// Versions are compatible only if they fully match.
@@ -26,16 +31,15 @@ fn version_matches(version: &str) -> bool {
 
 /// We just check the extension depending on the Operating System.
 fn extension_matches(file: &Path) -> bool {
-    file
-        .extension()
+    file.extension()
         .map(|ext| ext == std::env::consts::DLL_EXTENSION)
         .unwrap_or(false)
 }
 
 /// The runtime looks for plugins in a directory non-recursively
 pub fn find_plugins<P>(dir: P) -> Result<impl IntoIterator<Item = PathBuf>>
-    where
-        P: AsRef<Path>,
+where
+    P: AsRef<Path>,
 {
     if !dir.as_ref().is_dir() {
         return Err(Error::Path("not a directory".to_owned()).into());
@@ -92,7 +96,7 @@ pub fn setup_plugin(path: &str) -> Result<impl Fn() -> Result<()>> {
         let data = library
             .get::<*const ConnectorPlugin>(interface::DATA_IDENT)?
             .read();
-        println!("Plugin data: {:?}", data);
+        println!("Plugin data: {:?}", data.mime_types);
 
         // TODO: How to deal with lifetimes? We want to avoid the library from
         // being dropped. We also want to be able to call this function multiple

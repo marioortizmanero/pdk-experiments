@@ -1,4 +1,4 @@
-use dynamic_connectors::{setup_plugin, find_plugins};
+use dynamic_connectors::{find_plugins, setup_plugin};
 
 use std::{env, process};
 
@@ -16,14 +16,17 @@ fn main() {
         }
     };
 
-    for plugin in find_plugins(&path) {
-        let run_plugin = match setup_plugin(&plugin) {
-            Ok(f) => f,
-            Err(e) => {
-                eprintln!("Error when setting up the plugin: {}", e);
-                process::exit(1);
-            }
-        };
+    let plugins = find_plugins(&path).unwrap_or_else(|_| {
+        eprintln!("No plugins found in {}", path);
+        process::exit(1);
+    });
+
+    for plugin in plugins {
+        let plugin = plugin.to_str().unwrap();
+        let run_plugin = setup_plugin(&plugin).unwrap_or_else(|e| {
+            eprintln!("Error when setting up the plugin: {}", e);
+            process::exit(1);
+        });
 
         if let Err(e) = run_plugin() {
             eprintln!("Error when running the plugin: {}", e);
