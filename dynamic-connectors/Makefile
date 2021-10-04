@@ -42,6 +42,13 @@ release-wrongaddress:
 	cd plugin-wrongaddress && cargo build --release
 	cargo run --release -- plugin-wrongaddress/target/release/
 
+debug-panic:
+	cd plugin-panic && cargo build
+	cargo run -- plugin-panic/target/debug/
+release-panic:
+	cd plugin-panic && cargo build --release
+	cargo run --release -- plugin-panic/target/release/
+
 debug: debug-metronome
 release: release-metronome
 
