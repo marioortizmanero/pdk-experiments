@@ -77,7 +77,7 @@ pub fn setup_plugin(path: &str) -> Result<impl Fn() -> Result<()>> {
         // its lifetime properly. However, since plugin unloading is
         // unsupported, in order to simplify this we can just leak the library
         // for now.
-        let library = ManuallyDrop::new(Library::new(path)?);
+        let library = ManuallyDrop::new(Box::new(Library::new(path)?));
 
         let name = get_str(&library, interface::NAME_IDENT)?;
         println!("Initializing plugin {}", name);
@@ -105,6 +105,7 @@ pub fn setup_plugin(path: &str) -> Result<impl Fn() -> Result<()>> {
         // Initializing the plugin
         let state = (data.new)();
 
+        // The plugin can be ran at a later time by calling this closure
         Ok(move || {
             println!("Running plugin");
             let ret = (data.something)(state);
