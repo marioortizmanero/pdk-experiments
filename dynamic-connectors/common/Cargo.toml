@@ -5,3 +5,4 @@ edition = "2018"
 
 [dependencies]
 abi_stable = "0.9.3"
+thin_trait_object = "1.1.2"

@@ -1,4 +1,7 @@
+use std::ffi::c_void;
+
 use abi_stable::std_types::{RSlice, RSliceMut, RStr};
+use thin_trait_object::*;
 
 /// These are the identifiers and types that should be used between the plugin
 /// and runtime to import and export functionality.
@@ -84,15 +87,10 @@ macro_rules! define_connector_plugin {
 pub struct ConnectorPlugin<'input> {
     pub mime_types: RSlice<'static, RStr<'static>>,
     // Initializes the plugin by creating a new state
-    pub new: unsafe extern "C" fn() -> ConnectorState,
+    pub new: unsafe extern "C" fn() -> *mut c_void,
     // A stub function exported by the connector
-    pub some_function: unsafe extern "C" fn(state: &mut ConnectorState, data: RSliceMut<'input, u8>) -> i32,
+    pub something: unsafe extern "C" fn(state: *mut c_void) -> i32,
 }
 
-// TODO: every connector should have a different state declaration
-// This contains the internal state for the connectors
-#[repr(C)]
-#[derive(Debug, Clone)]
-pub struct ConnectorState {
-    counter: i32
-}
+#[thin_trait_object(drop_abi = "C")]
+pub trait BaseState {}
