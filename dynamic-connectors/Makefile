@@ -5,6 +5,7 @@
 	debug-wrongtype release-wrongtype \
 	debug-missing release-missing \
 	debug-wrongaddress release-wrongaddress \
+	debug-panic release-panic \
 	debug release clean
 
 debug-metronome:
