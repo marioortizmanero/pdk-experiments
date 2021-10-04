@@ -16,8 +16,8 @@ fn main() {
         }
     };
 
-    let plugins = find_plugins(&path).unwrap_or_else(|_| {
-        eprintln!("No plugins found in {}", path);
+    let plugins = find_plugins(&path).unwrap_or_else(|e| {
+        eprintln!("Couldn't find plugins in {}: {}", path, e);
         process::exit(1);
     });
 
