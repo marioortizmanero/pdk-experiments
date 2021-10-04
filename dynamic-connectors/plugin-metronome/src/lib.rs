@@ -1,15 +1,36 @@
 use common_dconnectors::{define_connector_plugin, ConnectorPlugin};
 
-use abi_stable::{rslice, rstr, std_types::RSliceMut};
+use abi_stable::{rslice, rstr};
+
+use std::{mem::ManuallyDrop, ffi::c_void};
 
 define_connector_plugin! {
     name: "metronome",
     data: ConnectorPlugin {
-        something: metronome,
-        mime_types: rslice![rstr!("json")]
+        mime_types: rslice![rstr!("json")],
+        new,
+        something,
     }
 }
 
-unsafe extern "C" fn metronome<'input>(_data: RSliceMut<'input, u8>) -> i32 {
-    1234
+pub struct MetronomeState {
+    counter: i32
+}
+
+unsafe extern "C" fn new() -> *mut c_void {
+    // We need the pointer to be alive after this function
+    let mut state = ManuallyDrop::new(MetronomeState {
+        counter: 0
+    });
+
+    &mut (*state) as *mut MetronomeState as _
+}
+
+unsafe extern "C" fn something(state: *mut c_void) -> i32 {
+    // Casting the void pointer to the original type
+    let state: &mut MetronomeState = &mut *(state as *mut MetronomeState);
+
+    state.counter += 1;
+
+    state.counter
 }

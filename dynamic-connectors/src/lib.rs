@@ -3,6 +3,7 @@ use common_dconnectors::{interface, ConnectorPlugin};
 use std::{
     ffi::CStr,
     fs, io,
+    mem::ManuallyDrop,
     os::raw::c_char,
     path::{Path, PathBuf},
 };
@@ -72,10 +73,13 @@ unsafe fn get_str<'a>(library: &'a Library, ident: &[u8]) -> Result<&'a str> {
 /// ran when calling the returned closure.
 pub fn setup_plugin(path: &str) -> Result<impl Fn() -> Result<()>> {
     unsafe {
-        let library = Library::new(path)?;
+        // In order to use the library outside of this setup we need to handle
+        // its lifetime properly. However, since plugin unloading is
+        // unsupported, in order to simplify this we can just leak the library
+        // for now.
+        let library = ManuallyDrop::new(Library::new(path)?);
 
         let name = get_str(&library, interface::NAME_IDENT)?;
-        // TODO: use `log`
         println!("Initializing plugin {}", name);
 
         // Making sure we can continue loading data
@@ -93,16 +97,18 @@ pub fn setup_plugin(path: &str) -> Result<impl Fn() -> Result<()>> {
             return Err(Error::UnknownPluginKind(kind.to_owned()).into());
         }
 
+        // Accessing the plugin metadata
         let data = library
             .get::<*const ConnectorPlugin>(interface::DATA_IDENT)?
             .read();
-        println!("Plugin data: {:?}", data.mime_types);
 
-        // TODO: How to deal with lifetimes? We want to avoid the library from
-        // being dropped. We also want to be able to call this function multiple
-        // times, and concurrently, for the tests.
+        // Initializing the plugin
+        let state = (data.new)();
+
         Ok(move || {
             println!("Running plugin");
+            let ret = (data.something)(state);
+            println!("Returned value: {}", ret);
 
             Ok(())
         })

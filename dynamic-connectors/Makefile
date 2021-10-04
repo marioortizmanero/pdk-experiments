@@ -9,38 +9,38 @@
 
 debug-metronome:
 	cd plugin-metronome && cargo build
-	cargo run -- plugin-metronome/target/debug/libplugin_metronome.so
+	cargo run -- plugin-metronome/target/debug/
 release-metronome:
 	cd plugin-metronome && cargo build --release
-	cargo run --release -- plugin-metronome/target/release/libplugin_metronome.so
+	cargo run --release -- plugin-metronome/target/release/
 
 debug-versionmismatch:
 	cd plugin-versionmismatch && cargo build
-	cargo run -- plugin-versionmismatch/target/debug/libplugin_versionmismatch.so
+	cargo run -- plugin-versionmismatch/target/debug/
 release-versionmismatch:
 	cd plugin-versionmismatch && cargo build --release
-	cargo run --release -- plugin-versionmismatch/target/release/libplugin_versionmismatch.so
+	cargo run --release -- plugin-versionmismatch/target/release/
 
 debug-wrongtype:
 	cd plugin-wrongtype && cargo build
-	cargo run -- plugin-wrongtype/target/debug/libplugin_wrongtype.so
+	cargo run -- plugin-wrongtype/target/debug/
 release-wrongtype:
 	cd plugin-wrongtype && cargo build --release
-	cargo run --release -- plugin-wrongtype/target/release/libplugin_wrongtype.so
+	cargo run --release -- plugin-wrongtype/target/release/
 
 debug-missing:
 	cd plugin-missing && cargo build
-	cargo run -- plugin-missing/target/debug/libplugin_missing.so
+	cargo run -- plugin-missing/target/debug/
 release-missing:
 	cd plugin-missing && cargo build --release
-	cargo run --release -- plugin-missing/target/release/libplugin_missing.so
+	cargo run --release -- plugin-missing/target/release/
 
 debug-wrongaddress:
 	cd plugin-wrongaddress && cargo build
-	cargo run -- plugin-wrongaddress/target/debug/libplugin_wrongaddress.so
+	cargo run -- plugin-wrongaddress/target/debug/
 release-wrongaddress:
 	cd plugin-wrongaddress && cargo build --release
-	cargo run --release -- plugin-wrongaddress/target/release/libplugin_wrongaddress.so
+	cargo run --release -- plugin-wrongaddress/target/release/
 
 debug: debug-metronome
 release: release-metronome
