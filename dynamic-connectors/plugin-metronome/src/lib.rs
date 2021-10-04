@@ -7,8 +7,8 @@ define_connector_plugin! {
     data: ConnectorPlugin {
         new,
         something,
-        is_sink: true,
-        is_source: false
+        is_sink: false,
+        is_source: true
     }
 }
 
