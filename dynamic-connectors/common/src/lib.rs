@@ -84,7 +84,7 @@ macro_rules! define_connector_plugin {
 /// This contains the data about the plugin
 #[repr(C)]
 #[derive(Clone)]
-pub struct ConnectorPlugin<'input> {
+pub struct ConnectorPlugin {
     pub mime_types: RSlice<'static, RStr<'static>>,
     // Initializes the plugin by creating a new state
     pub new: unsafe extern "C" fn() -> *mut c_void,
