@@ -26,8 +26,10 @@ mod test {
      */
 
     const DYNAMIC_PATH: &str = "dynamic-simple/plugin-sample/target/release/libplugin_sample.so";
-    const WASMER_PATH: &str = "wasmer-simple/plugin-sample/target/wasm32-wasi/release/plugin_sample.wasm";
-    const WASMTIME_PATH: &str = "wasmtime-simple/plugin-sample/target/wasm32-wasi/release/plugin_sample.wasm";
+    const WASMER_PATH: &str =
+        "wasmer-simple/plugin-sample/target/wasm32-wasi/release/plugin_sample.wasm";
+    const WASMTIME_PATH: &str =
+        "wasmtime-simple/plugin-sample/target/wasm32-wasi/release/plugin_sample.wasm";
 
     #[bench]
     fn dynamic_simple(bench: &mut Bencher) {

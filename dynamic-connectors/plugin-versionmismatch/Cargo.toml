@@ -1,0 +1,13 @@
+[package]
+name = "plugin-versionmismatch"
+version = "0.1.0"
+edition = "2018"
+
+# This is required so that the library is compiled as a shared library. See:
+#
+# * https://doc.rust-lang.org/cargo/reference/cargo-targets.html#the-crate-type-field
+# * https://doc.rust-lang.org/reference/linkage.html
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]

@@ -1,0 +1,9 @@
+[package]
+name = "sabi_simple"
+version = "0.1.0"
+edition = "2018"
+
+[dependencies]
+anyhow = "1.0"
+common-sabi-simple = { version = "0.1.0", path = "common" }
+abi_stable = "0.9"
