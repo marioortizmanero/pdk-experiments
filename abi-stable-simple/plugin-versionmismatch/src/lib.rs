@@ -14,7 +14,6 @@ fn instantiate_root_module() -> MinMod_Ref {
     .leak_into_prefix() // Converts the `MinMod` into `MinMod_Ref` and leaks it
 }
 
-// TODO: research "erasing"
 #[sabi_extern_fn]
 pub fn new() -> State {
     State {
