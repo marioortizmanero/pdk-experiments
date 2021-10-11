@@ -23,5 +23,12 @@ release-versionmismatch:
 	cd plugin-versionmismatch && cargo build --release
 	cargo run --release -- plugin-versionmismatch/target/release/
 
+debug-wrongtype:
+	cd plugin-wrongtype && cargo build
+	cargo run -- plugin-wrongtype/target/debug/
+release-wrongtype:
+	cd plugin-wrongtype && cargo build --release
+	cargo run --release -- plugin-wrongtype/target/release/
+
 clean:
 	rm -rf target plugin-sample/target
