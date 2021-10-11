@@ -1,6 +1,6 @@
 [package]
-name = "common-sabi-simple"
-version = "0.2.0"
+name = "common-sabi-simple-old"
+version = "0.1.0"
 edition = "2018"
 
 [dependencies]

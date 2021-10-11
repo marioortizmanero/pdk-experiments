@@ -3,7 +3,7 @@ use common_sabi_simple::MinMod_Ref;
 use anyhow::{Result, anyhow};
 
 pub fn run_plugin(path: &str) -> Result<()> {
-    let plugin = MinMod_Ref::load_from_file(path.as_ref())?;
+    let plugin = MinMod_Ref::load_from_directory(path.as_ref())?;
     println!("Loading plugin {}", MinMod_Ref::NAME);
 
     // First we obtain the function pointer, which may fail in case the plugin

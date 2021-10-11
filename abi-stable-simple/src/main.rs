@@ -3,7 +3,7 @@ use sabi_simple::run_plugin;
 use std::{env, process};
 
 fn usage() {
-    println!("Usage: ./main PLUGIN_PATH");
+    println!("Usage: ./main PLUGIN_DIR");
 }
 
 fn main() {
