@@ -1,0 +1,18 @@
+[package]
+name = "plugin-sample"
+version = "0.1.0"
+edition = "2018"
+
+# This is required so that the library is compiled as a shared library. See:
+#
+# * https://doc.rust-lang.org/cargo/reference/cargo-targets.html#the-crate-type-field
+# * https://doc.rust-lang.org/reference/linkage.html
+[lib]
+# This way, the shared object will be saved as `abi_stable` prefers, for example
+# `libmin.so`.
+name = "min"
+crate-type = ["cdylib"]
+
+[dependencies]
+abi_stable = "0.9"
+common-sabi-simple = { version = "0.2.0", path = "../common" }

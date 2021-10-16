@@ -18,7 +18,7 @@ the plugin with the main binary and see what happens. There's usually a
 
 ## Benchmarking
 
-The main crate in `src` includes some benchmarks that might be of interest. You
-can run them with `cargo bench`. It requires a nightly compiler, and will work
-as long as the plugins are compiled in their `target` directories. Remember to
-use `--release` when building the plugins.
+The `benches` directory includes some benchmarks that might be of interest. You
+can run them with `cargo bench`. They will work as long as the plugins are
+compiled in their `target` directories. Remember to use `--release` when
+building the plugins.

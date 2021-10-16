@@ -30,5 +30,8 @@ release-wrongtype:
 	cd plugin-wrongtype && cargo build --release
 	cargo run --release -- plugin-wrongtype/target/release/
 
+debug: debug-sample
+release: release-sample
+
 clean:
 	rm -rf target plugin-sample/target

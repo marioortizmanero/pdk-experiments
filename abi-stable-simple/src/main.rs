@@ -1,4 +1,4 @@
-use sabi_simple::run_plugin;
+use abi_stable_simple::run_plugin;
 
 use std::{env, process};
 
