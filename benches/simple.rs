@@ -25,21 +25,21 @@ const WASMTIME_PATH: &str =
 
 fn dynamic_simple(bench: &mut Criterion) {
     check_exists(DYNAMIC_PATH);
-    bench.bench_function("dynamic simple", |b| {
+    bench.bench_function("dynamic simple", move |b| {
         b.iter(|| dynamic_simple::run_plugin(DYNAMIC_PATH).unwrap())
     });
 }
 
 fn wasmer_simple(bench: &mut Criterion) {
     check_exists(WASMER_PATH);
-    bench.bench_function("wasmer simple", |b| {
+    bench.bench_function("wasmer simple", move |b| {
         b.iter(|| wasmer_simple::run_plugin(WASMER_PATH).unwrap())
     });
 }
 
 fn wasmtime_simple(bench: &mut Criterion) {
     check_exists(WASMTIME_PATH);
-    bench.bench_function("wasmtime simple", |b| {
+    bench.bench_function("wasmtime simple", move |b| {
         b.iter(|| wasmer_simple::run_plugin(WASMTIME_PATH).unwrap())
     });
 }
