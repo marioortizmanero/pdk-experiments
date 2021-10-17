@@ -1,5 +1,6 @@
 [package]
-name = "common-sabi-simple-wrong"
+# The name has to be the same
+name = "common-sabi-simple"
 version = "0.2.0"
 edition = "2018"
 
