@@ -1,11 +1,13 @@
+//! The plugin is given with its full path instead of a directory for more
+//! reliable benchmarking.
+
 use common_dynamic_bench::{interface, ConnectorPlugin};
 
 use std::{
     ffi::CStr,
-    fs, io,
+    io,
     mem::ManuallyDrop,
     os::raw::c_char,
-    path::{Path, PathBuf},
 };
 
 use anyhow::Result;
@@ -21,35 +23,11 @@ enum Error {
     UnknownPluginKind(String),
     #[error("input/output: {0}")]
     Io(#[from] io::Error),
-    #[error("invalid path: {0}")]
-    Path(String),
 }
 
 /// Versions are compatible only if they fully match.
 fn version_matches(version: &str) -> bool {
     version == PKG_VERSION
-}
-
-/// We just check the extension depending on the Operating System.
-fn extension_matches(file: &Path) -> bool {
-    file.extension()
-        .map(|ext| ext == std::env::consts::DLL_EXTENSION)
-        .unwrap_or(false)
-}
-
-/// The runtime looks for plugins in a directory non-recursively
-pub fn find_plugins<P>(dir: P) -> Result<impl IntoIterator<Item = PathBuf>>
-where
-    P: AsRef<Path>,
-{
-    if !dir.as_ref().is_dir() {
-        return Err(Error::Path("not a directory".to_owned()).into());
-    }
-
-    let iter = fs::read_dir(dir)?
-        .filter_map(|node| Some(node.ok()?.path()))
-        .filter(|path| extension_matches(path));
-    Ok(iter)
 }
 
 /// Obtaining a string from the metadata of the library.
@@ -73,15 +51,11 @@ unsafe fn get_str<'a>(library: &'a Library, ident: &[u8]) -> Result<&'a str> {
 /// ran when calling the returned closure.
 pub fn setup_plugin(path: &str) -> Result<impl FnMut(i32, i32) -> i32> {
     unsafe {
-        let path = find_plugins(path)?.into_iter().next().expect("No plugins found");
-
         // In order to use the library outside of this setup we need to handle
         // its lifetime properly. However, since plugin unloading is
         // unsupported, in order to simplify this we can just leak the library
         // for now.
         let library = ManuallyDrop::new(Box::new(Library::new(path)?));
-
-        // let name = get_str(&library, interface::NAME_IDENT)?;
 
         // Making sure we can continue loading data
         let version = get_str(&library, interface::COMMON_VERSION_IDENT)?;

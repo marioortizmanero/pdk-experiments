@@ -17,8 +17,8 @@ fn check_exists(path: &str) {
     }
 }
 
-const DYNAMIC_PATH: &str = "dynamic-bench/plugin-sample/target/release/";
-const ABI_STABLE_PATH: &str = "abi-stable-bench/plugin-sample/target/release/";
+const DYNAMIC_PATH: &str = "dynamic-bench/plugin-sample/target/release/libplugin_sample.so";
+const ABI_STABLE_PATH: &str = "abi-stable-bench/plugin-sample/target/release/libplugin_sample.so";
 
 fn dynamic_setup(bench: &mut Criterion) {
     check_exists(DYNAMIC_PATH);
