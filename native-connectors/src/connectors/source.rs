@@ -182,7 +182,7 @@ where
                         self.source.fail(stream, pull_counter).await;
                     }
                 },
-                Ok(SourceReply::Empty(wait_ms)) => 
+                Ok(SourceReply::Empty(wait_ms)) => {
                     thread::sleep_ms(wait_ms as u32);
                 }
                 Err(e) => println!("[Source] Error pulling data: {}", e),

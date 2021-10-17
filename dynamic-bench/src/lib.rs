@@ -1,4 +1,4 @@
-use common_dconnectors::{interface, ConnectorPlugin};
+use common_dynamic_bench::{interface, ConnectorPlugin};
 
 use std::{
     ffi::CStr,
@@ -48,7 +48,7 @@ where
 
     let iter = fs::read_dir(dir)?
         .filter_map(|node| Some(node.ok()?.path()))
-        .filter(|path| extension_matches(&path));
+        .filter(|path| extension_matches(path));
     Ok(iter)
 }
 

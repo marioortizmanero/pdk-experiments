@@ -11,4 +11,4 @@ edition = "2018"
 crate-type = ["cdylib"]
 
 [dependencies]
-common-dconnectors = { path = "../common", version = "0.1.0" }
+common-dynamic-bench = { path = "../common", version = "0.1.0" }

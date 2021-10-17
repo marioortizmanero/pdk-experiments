@@ -1,4 +1,4 @@
-use common_dconnectors::{define_connector_plugin, ConnectorPlugin};
+use common_dynamic_bench::{define_connector_plugin, ConnectorPlugin};
 
 use std::{mem::ManuallyDrop, ffi::c_void};
 
