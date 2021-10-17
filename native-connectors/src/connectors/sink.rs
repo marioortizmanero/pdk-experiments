@@ -9,6 +9,9 @@ pub struct SinkManagerBuilder;
 /// NOTE: simplification of the real type
 pub struct SinkReply;
 
+/// NOTE: simplification of the real type
+pub struct SinkAddr;
+
 /// Result for a sink function that may provide insights or response.
 ///
 /// It can return None or Some(vec![]) if no insights/response were generated.

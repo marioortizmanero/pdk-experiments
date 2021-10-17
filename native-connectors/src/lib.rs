@@ -23,19 +23,11 @@ pub mod errors {
     pub type Result<T> = std::result::Result<T, Error>;
 }
 
-/// TODO document
+/// For benchmarking reasons, setting up the plugin and running it is a two step
+/// process. Thus, the setup is done when calling this function, and it can be
+/// ran when calling the returned closure.
 pub fn setup_plugin() -> impl Fn() -> Result<()> {
-    // TODO: for now should we use
-    // https://docs.rs/abi_stable/0.10.2/abi_stable/external_types/crossbeam_channel/index.html
-    // which is closer to what tremor actually uses (the only difference being
-    // that it's not asynchronous), or something simpler like callbacks?
     move || {
-        // TODO: this uses `Box<dyn Connector>`, how can we make that work for
-        // dynamic loading?
-
-        // TODO: perhaps it would be better to initialize the metronome directly
-        // and use it as a connector or a source?
-
         // For this example we skip the whole concept of `World` and `Manager`.
         // This acts directy as a `connectors::Manager`, which initializes and
         // runs a list of known actions over a single connector (instead of
@@ -50,14 +42,6 @@ pub fn setup_plugin() -> impl Fn() -> Result<()> {
         };
         let source = connector.create_source(SourceContext, source_builder).unwrap().unwrap();
 
-        // source.
-
-        /*
-        println!("Running plugin {}", PLUGIN_DATA.plugin.name);
-
-        let encoded = (PLUGIN_DATA.codec_encode)(&Value::Integer(1234));
-        println!("encoded: {:?}", encoded);
-        */
 
         Ok(())
     }
