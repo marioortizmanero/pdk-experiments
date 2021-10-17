@@ -3,7 +3,13 @@ pub mod event;
 pub mod time;
 pub mod value;
 
-use crate::{connectors::{metronome::{Builder, Metronome}, source::{SourceContext, SourceManagerBuilder}}, url::TremorUrl};
+use crate::{
+    connectors::{
+        metronome::{Builder, Metronome},
+        source::{SourceContext, SourceManagerBuilder},
+    },
+    url::TremorUrl,
+};
 
 use anyhow::Result;
 
@@ -40,8 +46,10 @@ pub fn setup_plugin() -> impl Fn() -> Result<()> {
             streams: todo!(),
             source_metrics_reporter: todo!(),
         };
-        let source = connector.create_source(SourceContext, source_builder).unwrap().unwrap();
-
+        let source = connector
+            .create_source(SourceContext, source_builder)
+            .unwrap()
+            .unwrap();
 
         Ok(())
     }

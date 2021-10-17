@@ -2,7 +2,11 @@ use crate::{
     errors::Result,
     event::{EventOriginUri, EventPayload},
 };
-use std::{collections::HashMap, thread, sync::mpsc::{Receiver, Sender}};
+use std::{
+    collections::HashMap,
+    sync::mpsc::{Receiver, Sender},
+    thread,
+};
 
 /// NOTE: simplification of the real type
 pub struct SourceContext;
@@ -23,24 +27,20 @@ pub enum SourceReply {
 
 /// NOTE: simplification of the real type
 /// Messages a Source can receive
-pub enum SourceMsg {
-}
+pub enum SourceMsg {}
 
 /// source part of a connector
 pub trait Source: Send {
     /// Pulls an event from the source if one exists
     /// `idgen` is passed in so the source can inspect what event id it would get if it was producing 1 event from the pulled data
-    /* async */ fn pull_data(&mut self, pull_id: u64, ctx: &SourceContext) -> Result<SourceReply>;
+    /* async */
+    fn pull_data(&mut self, pull_id: u64, ctx: &SourceContext) -> Result<SourceReply>;
     /// This callback is called when the data provided from
     /// pull_event did not create any events, this is needed for
     /// linked sources that require a 1:1 mapping between requests
     /// and responses, we're looking at you REST
-    /* async */ fn on_no_events(
-        &mut self,
-        _pull_id: u64,
-        _stream: u64,
-        _ctx: &SourceContext,
-    ) -> Result<()> {
+    /* async */
+    fn on_no_events(&mut self, _pull_id: u64, _stream: u64, _ctx: &SourceContext) -> Result<()> {
         Ok(())
     }
 
@@ -54,39 +54,49 @@ pub trait Source: Send {
     ///////////////////////////
 
     /// called when the source is started. This happens only once in the whole source lifecycle, before any other callbacks
-    /* async */ fn on_start(&mut self, _ctx: &mut SourceContext) {}
+    /* async */
+    fn on_start(&mut self, _ctx: &mut SourceContext) {}
     /// called when the source is explicitly paused as result of a user/operator interaction
     /// in contrast to `on_cb_close` which happens automatically depending on downstream pipeline or sink connector logic.
-    /* async */ fn on_pause(&mut self, _ctx: &mut SourceContext) {}
+    /* async */
+    fn on_pause(&mut self, _ctx: &mut SourceContext) {}
     /// called when the source is explicitly resumed from being paused
-    /* async */ fn on_resume(&mut self, _ctx: &mut SourceContext) {}
+    /* async */
+    fn on_resume(&mut self, _ctx: &mut SourceContext) {}
     /// called when the source is stopped. This happens only once in the whole source lifecycle, as the very last callback
-    /* async */ fn on_stop(&mut self, _ctx: &mut SourceContext) {}
+    /* async */
+    fn on_stop(&mut self, _ctx: &mut SourceContext) {}
 
     // circuit breaker callbacks
     /// called when we receive a `close` Circuit breaker event from any connected pipeline
     /// Expected reaction is to pause receiving messages, which is handled automatically by the runtime
     /// Source implementations might want to close connections or signal a pause to the upstream entity it connects to if not done in the connector (the default)
     // TODO: add info of Cb event origin (port, origin_uri)?
-    /* async */ fn on_cb_close(&mut self, _ctx: &mut SourceContext) {}
+    /* async */
+    fn on_cb_close(&mut self, _ctx: &mut SourceContext) {}
     /// Called when we receive a `open` Circuit breaker event from any connected pipeline
     /// This means we can start/continue polling this source for messages
     /// Source implementations might want to start establishing connections if not done in the connector (the default)
-    /* async */ fn on_cb_open(&mut self, _ctx: &mut SourceContext) {}
+    /* async */
+    fn on_cb_open(&mut self, _ctx: &mut SourceContext) {}
 
     // guaranteed delivery callbacks
     /// an event has been acknowledged and can be considered delivered
     /// multiple acks for the same set of ids are always possible
-    /* async */ fn ack(&mut self, _stream_id: u64, _pull_id: u64) {}
+    /* async */
+    fn ack(&mut self, _stream_id: u64, _pull_id: u64) {}
     /// an event has failed along its way and can be considered failed
     /// multiple fails for the same set of ids are always possible
-    /* async */ fn fail(&mut self, _stream_id: u64, _pull_id: u64) {}
+    /* async */
+    fn fail(&mut self, _stream_id: u64, _pull_id: u64) {}
 
     // connectivity stuff
     /// called when connector lost connectivity
-    /* async */ fn on_connection_lost(&mut self, _ctx: &mut SourceContext) {}
+    /* async */
+    fn on_connection_lost(&mut self, _ctx: &mut SourceContext) {}
     /// called when connector re-established connectivity
-    /* async */ fn on_connection_established(&mut self, _ctx: &mut SourceContext) {}
+    /* async */
+    fn on_connection_established(&mut self, _ctx: &mut SourceContext) {}
 
     /// Is this source transactional or can acks/fails be ignored
     fn is_transactional(&self) -> bool {
@@ -126,7 +136,7 @@ impl SourceManagerBuilder {
         let manager = SourceManager::new(source, ctx, self, source_rx);
         // Spawn manager thread. NOTE: this is simplified, removing
         // `SourceManager`.
-        thread::spawn(move || );
+        thread::spawn(move || {});
 
         Ok(SourceAddr { addr: source_tx })
     }
@@ -151,13 +161,9 @@ where
         builder: SourceManagerBuilder,
         rx: Receiver<SourceMsg>,
     ) -> Self {
-        Self {
-            source,
-            ctx,
-            rx,
-        }
+        Self { source, ctx, rx }
     }
-    
+
     fn run(mut self) -> Result<()> {
         let mut pull_counter: u64 = 0;
         loop {
@@ -181,7 +187,7 @@ where
                     if error {
                         self.source.fail(stream, pull_counter).await;
                     }
-                },
+                }
                 Ok(SourceReply::Empty(wait_ms)) => {
                     thread::sleep_ms(wait_ms as u32);
                 }

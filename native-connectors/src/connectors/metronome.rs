@@ -71,7 +71,8 @@ impl Source for Metronome {
     }
 }
 impl Connector for Metronome {
-    /* async */ fn connect(
+    /* async */
+    fn connect(
         &mut self,
         _ctx: &ConnectorContext,
         _notifier: super::reconnect::ConnectionLostNotifier,
@@ -79,7 +80,8 @@ impl Connector for Metronome {
         Ok(true)
     }
 
-    /* async */ fn on_start(&mut self, _ctx: &ConnectorContext) -> Result<ConnectorState> {
+    /* async */
+    fn on_start(&mut self, _ctx: &ConnectorContext) -> Result<ConnectorState> {
         Ok(ConnectorState::Running)
     }
 
@@ -87,7 +89,8 @@ impl Connector for Metronome {
         "json"
     }
 
-    /* async */ fn create_source(
+    /* async */
+    fn create_source(
         &mut self,
         source_context: SourceContext,
         builder: super::source::SourceManagerBuilder,
