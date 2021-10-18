@@ -3,12 +3,7 @@
 
 use common_dynamic_bench::{interface, ConnectorPlugin};
 
-use std::{
-    ffi::CStr,
-    io,
-    mem::ManuallyDrop,
-    os::raw::c_char,
-};
+use std::{ffi::CStr, io, mem::ManuallyDrop, os::raw::c_char};
 
 use anyhow::Result;
 use libloading::Library;
@@ -80,6 +75,6 @@ pub fn setup_plugin(path: &str) -> Result<impl FnMut(i32, i32) -> i32> {
         let state = (data.new)();
 
         // The plugin can be ran at a later time by calling this closure
-        Ok(move |a, b|  (data.min)(state, a, b))
+        Ok(move |a, b| (data.min)(state, a, b))
     }
 }
