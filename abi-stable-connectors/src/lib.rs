@@ -3,7 +3,7 @@
 
 use abi_stable::library::RootModule;
 use anyhow::{anyhow, Result};
-use common_abi_stable_connectors::ConnectorMod_Ref;
+use common_abi_stable_connectors::{Connector, ConnectorMod_Ref};
 
 /// For benchmarking reasons, setting up the plugin and running it is a two step
 /// process. Thus, the setup is done when calling this function, and it can be
@@ -18,7 +18,8 @@ pub fn run_plugin(path: &str) -> Result<()> {
         .ok_or_else(|| anyhow!("method `new` not found"))?;
 
     // We initialize the plugin, obtaining a state.
-    let connector = new_fn();
+    let raw_connector = new_fn();
+    let connector = Connector(raw_connector);
     println!("Default codec: {}", connector.default_codec());
 
     Ok(())
