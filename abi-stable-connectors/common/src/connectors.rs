@@ -45,20 +45,13 @@ use abi_stable::{std_types::{
 use crate::{
     RResult,
     source::{self, SourceContext, RawSource_TO},
+    reconnect,
     sink::{self, SinkContext, RawSink_TO},
 };
 
 // For more complex types we need to wrap them as opaque types.
 pub use crate::wrappers::ConnectorContext;
 
-// Stubs for the original trait. We can't use `()` because it's not FFI-safe.
-pub mod reconnect {
-    use super::{StableAbi, RString};
-
-    #[repr(C)]
-    #[derive(StableAbi, Default)]
-    pub struct ConnectionLostNotifier(RString);
-}
 // pub type ConnectorContext = i32;
 #[repr(C)]
 #[derive(StableAbi, Default)]

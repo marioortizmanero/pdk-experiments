@@ -6,6 +6,7 @@
 pub mod connectors;
 pub mod source;
 pub mod sink;
+pub mod reconnect;
 mod wrappers;
 
 use abi_stable::{

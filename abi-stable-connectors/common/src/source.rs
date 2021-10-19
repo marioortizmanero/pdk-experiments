@@ -19,5 +19,12 @@ pub enum SourceReply {
 
 #[abi_stable::sabi_trait]
 pub trait RawSource: Send {
+    /// Pulls an event from the source if one exists
+    /// determine the codec to be used
     fn pull_data(&mut self, pull_id: u64, ctx: &SourceContext) -> RResult<SourceReply>;
+
+    /// Is this source transactional or can acks/fails be ignored
+    fn is_transactional(&self) -> bool {
+        false
+    }
 }
