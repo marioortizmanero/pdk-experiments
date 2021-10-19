@@ -5,14 +5,19 @@
 
 pub mod connectors;
 pub mod source;
+pub mod sink;
 mod wrappers;
 
 use abi_stable::{
     declare_root_module_statics, library::RootModule, package_version_strings,
-    sabi_types::VersionStrings, std_types::RBox, StableAbi,
+    sabi_types::VersionStrings, std_types::{RBox, RString}, StableAbi,
 };
 
 use crate::connectors::RawConnector_TO;
+
+// For ease of use
+pub type RResult<T> = abi_stable::std_types::RResult<T, RString>;
+pub type Result<T> = std::result::Result<T, RString>;
 
 #[repr(C)]
 #[derive(StableAbi)]

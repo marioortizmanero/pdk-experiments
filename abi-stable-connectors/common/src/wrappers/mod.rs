@@ -2,7 +2,6 @@ use abi_stable::{
     std_types::{RBox, RString, ROption},
     StableAbi,
 };
-use cglue::cglue_trait;
 
 /// Internal type with types that aren't wrapped by `abi_stable`
 #[repr(C)]

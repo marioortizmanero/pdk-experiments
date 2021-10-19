@@ -1,11 +1,16 @@
 //! The plugin is given with its full path instead of a directory for more
 //! reliable benchmarking.
 
+mod source;
+mod sink;
+mod connectors;
+
 use abi_stable::library::RootModule;
 use anyhow::{anyhow, Result};
 use tokio::time;
 use std::time::Duration;
-use common_abi_stable_connectors::{connectors::Connector, source::{SourceManagerBuilder, SourceContext}, ConnectorMod_Ref};
+use common_abi_stable_connectors::{source::SourceContext, ConnectorMod_Ref};
+use crate::{source::SourceManagerBuilder, connectors::Connector};
 
 /// For benchmarking reasons, setting up the plugin and running it is a two step
 /// process. Thus, the setup is done when calling this function, and it can be
@@ -27,7 +32,7 @@ pub async fn run_plugin(path: &str) -> Result<()> {
 
     let builder = SourceManagerBuilder::default();
     let context = SourceContext::default();
-    let source_addr = connector.create_source(context, builder).await?;
+    let source_addr = connector.create_source(context, builder).await.map_err(|e| anyhow!(e))?;
     match source_addr {
         Some(addr) => {
             // This part of the program acts as the `ConnectorManager`. For

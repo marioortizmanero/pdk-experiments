@@ -1,3 +1,40 @@
+// Problem #1 (you should've seen it coming :P):
+//
+// In the connectors plugin interface I have a single `new` function that
+// exports a `Connector` dynamic trait from the plugin. The runtime can then use
+// that as a generic connector just like how Tremor does now. On the
+// plugin-side, the `create_{source,sink}` methods call `builder.spawn`, which
+// relies on the fact that the type implements `Source` or `Sink`. This spawns
+// the new task and communicates with the connector. As I said, this happens on
+// the implementor side, so the runtime doesn't know if the concrete type
+// implements `Sink` or `Source`, only that it's a `Connector`, and the plugin
+// handles the rest itself.
+//
+// However, since we wanted to simplify the plugin interface as much as
+// possible, the communication details should happen on the runtime rather than
+// on the plugin. What I mean is that, instead of calling `builder.spawn` on the
+// plugin and creating the channel on the plugin, it should happen on the
+// runtime. Thus, the whole idea of `create_{source,sink}` is now somewhat
+// pointless, because it's handled by the runtime. We have a `dyn Connector`,
+// with which we can't know if `Source` or `Sink` are implemented as well. We'd
+// need `dyn (Connector + Source + Sink)` for that, but `Source` and `Sink` are
+// actually optional, so it depends on the plugin anyway.
+//
+// There are two ways to fix this:
+//
+// * The `new` function returns a `dyn (Connector + Source + Sink)` instead and
+//   has fields to make sure `Source` or `Sink` are properly implemented. All of
+//   the connectors implement `Source` and `Sink` always, but we can make it
+//   optional by adding a marker or something like that.
+//
+//   Spoiler: that won't work with just `abi_stable` anyway, lol. Only with
+//   `cglue`, which makes it possible to have groups of traits. So it *would* be
+//   possible, but unnecessarily complicated and not an ideal solution anyway.
+// * We add `new_
+//
+// Sorry for getting your hopes up lol. For the millionth time in a row, it's
+// not as easy as I thought.
+
 use abi_stable::{std_types::{
     RBox,
     ROption::{self, RNone, RSome},
@@ -5,23 +42,16 @@ use abi_stable::{std_types::{
     RStr, RString,
 }, StableAbi};
 
-use crate::source::{self, SourceContext};
+use crate::{
+    RResult,
+    source::{self, SourceContext, RawSource_TO},
+    sink::{self, SinkContext, RawSink_TO},
+};
 
 // For more complex types we need to wrap them as opaque types.
-use crate::wrappers::ConnectorContext;
+pub use crate::wrappers::ConnectorContext;
 
 // Stubs for the original trait. We can't use `()` because it's not FFI-safe.
-pub mod sink {
-    use super::{StableAbi, RString};
-
-    #[repr(C)]
-    #[derive(StableAbi, Default)]
-    pub struct SinkManagerBuilder(RString);
-
-    #[repr(C)]
-    #[derive(StableAbi, Default)]
-    pub struct SinkAddr(RString);
-}
 pub mod reconnect {
     use super::{StableAbi, RString};
 
@@ -33,32 +63,31 @@ pub mod reconnect {
 #[repr(C)]
 #[derive(StableAbi, Default)]
 pub struct ConnectorState(RString);
-#[repr(C)]
-#[derive(StableAbi, Default)]
-pub struct SinkContext(RString);
-pub type RResult<T> = abi_stable::std_types::RResult<T, RString>;
-pub type Result<T> = std::result::Result<T, RString>;
 
 // The low level connector trait used for the plugins, with types from
 // abi_stable.
 #[abi_stable::sabi_trait]
 pub trait RawConnector: Send {
-    /* async */
+    // Note that the source implementation isn't limited to the connector side
+    // anymore. Since the communication details ought to be moved to the runtime
+    // rather than the plugin for simplicity's sake, the source is handled at
+    // the runtime as well, and it only exports synchronous basic methods.
+    //
+    // In practical terms, this returns a `dyn RawSource` rather than
+    // `SourceAddr`, and the latter is now created on the runtime. The builder
+    // isn't passed here anymore either.
     fn create_source(
         &mut self,
         _source_context: SourceContext,
-        _builder: source::SourceManagerBuilder,
-    ) -> RResult<ROption<source::SourceAddr>> {
+    ) -> RResult<ROption<RawSource_TO<'static, RBox<()>>>> {
         ROk(RNone)
     }
 
-    /* async */
     fn create_sink(
         &mut self,
         _sink_context: SinkContext,
-        _builder: sink::SinkManagerBuilder,
-    ) -> RResult<ROption<sink::SinkAddr>> {
-        ROk(RNone)
+    ) -> RResult<ROption<RawSink_TO<'static, RBox<()>>>> {
+        unimplemented!("only sources are implemented for now")
     }
 
     /* async */
@@ -79,61 +108,4 @@ pub trait RawConnector: Send {
     fn on_stop(&mut self, _ctx: &ConnectorContext) {}
 
     fn default_codec(&self) -> RStr<'_>;
-}
-
-// The higher level connector interface, which wraps the raw connector from the
-// plugin.
-pub struct Connector(pub RawConnector_TO<'static, RBox<()>>);
-impl Connector {
-    pub async fn create_source(
-        &mut self,
-        source_context: SourceContext,
-        builder: source::SourceManagerBuilder,
-    ) -> Result<Option<source::SourceAddr>> {
-        match self.0.create_source(source_context, builder) {
-            ROk(RSome(source)) => {
-                let source = Source(source);
-                builder.spawn(source, source_context).map(Some)
-            },
-            ROk(RNone) => Ok(None),
-            RErr(err) => Err(err),
-        }
-    }
-
-    pub async fn create_sink(
-        &mut self,
-        sink_context: SinkContext,
-        builder: sink::SinkManagerBuilder,
-    ) -> Result<Option<sink::SinkAddr>> {
-        // NOTE: the structure should be almost the same as `create_source`
-        unimplemented!("only sources are implemented for now")
-    }
-
-    pub async fn connect(
-        &mut self,
-        ctx: &ConnectorContext,
-        notifier: reconnect::ConnectionLostNotifier,
-    ) -> Result<bool> {
-        self.0.connect(ctx, notifier).into()
-    }
-
-    pub async fn on_start(&mut self, ctx: &ConnectorContext) -> Result<ConnectorState> {
-        self.0.on_start(ctx).into()
-    }
-
-    pub async fn on_pause(&mut self, ctx: &ConnectorContext) {
-        self.0.on_pause(ctx)
-    }
-
-    pub async fn on_resume(&mut self, ctx: &ConnectorContext) {
-        self.0.on_resume(ctx)
-    }
-
-    pub async fn on_stop(&mut self, ctx: &ConnectorContext) {
-        self.0.on_stop(ctx)
-    }
-
-    pub fn default_codec(&self) -> &str {
-        self.0.default_codec().into()
-    }
 }

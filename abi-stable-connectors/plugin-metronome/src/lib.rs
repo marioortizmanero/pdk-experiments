@@ -9,7 +9,7 @@ use abi_stable::{
 
 use common_abi_stable_connectors::{
     connectors::{RawConnector, RawConnector_TO, RResult, ConnectorContext},
-    source::{SourceReply, Source}
+    source::{SourceReply, RawSource}
 };
 
 struct Metronome;
@@ -18,9 +18,11 @@ impl RawConnector for Metronome {
     fn create_source(
         &mut self,
         source_context: SourceContext,
-        builder: super::source::SourceManagerBuilder,
     ) -> Result<Option<todo!()>> {
-        todo!()
+        let metronome = self.clone();
+        // We don't need to be able to downcast the connector back to the original
+        // type, so we just pass it as an opaque type.
+        RawSource_TO::from_value(metronome, TD_Opaque)
     }
 
     /* async */
@@ -42,7 +44,7 @@ impl RawConnector for Metronome {
     }
 }
 
-impl Source for Metronome {
+impl RawSource for Metronome {
     fn pull_data(&mut self, pull_id: u64, _ctx: &SourceContext) -> Result<SourceReply> {
         let now = nanotime();
         if self.next < now {
