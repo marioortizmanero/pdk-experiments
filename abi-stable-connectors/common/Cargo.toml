@@ -6,3 +6,5 @@ edition = "2018"
 [dependencies]
 abi_stable = "0.10"
 async-trait = "0.1"
+cglue = "0.1"
+serde_yaml = "0.8"

@@ -1,5 +1,6 @@
 use abi_stable::{
     export_root_module,
+    rvec,
     type_level::downcasting::TD_Opaque,
     prefix_type::PrefixTypeTrait,
     rstr, sabi_extern_fn,
@@ -7,14 +8,21 @@ use abi_stable::{
 };
 
 use common_abi_stable_connectors::{
-    reconnect, Connector, ConnectorContext, ConnectorMod, ConnectorMod_Ref, ConnectorState,
-    Connector_TO,
-    RResult,
+    connectors::{RawConnector, RawConnector_TO, RResult, ConnectorContext},
+    source::{SourceReply, Source}
 };
 
 struct Metronome;
 
-impl Connector for Metronome {
+impl RawConnector for Metronome {
+    fn create_source(
+        &mut self,
+        source_context: SourceContext,
+        builder: super::source::SourceManagerBuilder,
+    ) -> Result<Option<todo!()>> {
+        todo!()
+    }
+
     /* async */
     fn connect(
         &mut self,
@@ -34,6 +42,22 @@ impl Connector for Metronome {
     }
 }
 
+impl Source for Metronome {
+    fn pull_data(&mut self, pull_id: u64, _ctx: &SourceContext) -> Result<SourceReply> {
+        let now = nanotime();
+        if self.next < now {
+            let data = rvec![];
+            Ok(SourceReply::Data(data))
+        } else {
+            Ok(SourceReply::Sleep(self.next - now))
+        }
+    }
+
+    fn is_transactional(&self) -> bool {
+        false
+    }
+}
+
 /// Exports the root module of this library.
 ///
 /// This code isn't run until the layout of the type it returns is checked.
@@ -43,9 +67,9 @@ fn instantiate_root_module() -> ConnectorMod_Ref {
 }
 
 #[sabi_extern_fn]
-pub fn new() -> Connector_TO<'static, RBox<()>> {
+pub fn new() -> RawConnector_TO<'static, RBox<()>> {
     let metronome = Metronome;
     // We don't need to be able to downcast the connector back to the original
     // type, so we just pass it as an opaque type.
-    Connector_TO::from_value(metronome, TD_Opaque)
+    RawConnector_TO::from_value(metronome, TD_Opaque)
 }
