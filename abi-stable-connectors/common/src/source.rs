@@ -6,7 +6,7 @@ use crate::{RResult, Result};
 
 // Stubs for the original trait. We can't use `()` because it's not FFI-safe.
 #[repr(C)]
-#[derive(StableAbi, Default)]
+#[derive(StableAbi, Default, Clone)]
 pub struct SourceContext(RString);
 
 #[repr(C)]

@@ -1,18 +1,19 @@
-use abi_stable::{
-    std_types::{
-        RBox, RResult::{ROk, RErr}, ROption::{RSome, RNone}
-    }
+use abi_stable::std_types::{
+    RBox,
+    ROption::{RNone, RSome},
+    RResult::{RErr, ROk},
 };
 
 use common_abi_stable_connectors::{
-    Result, connectors::{RawConnector_TO, ConnectorContext, reconnect, ConnectorState},
-    source::{SourceContext, RawSource},
-    sink::{SinkContext}
+    connectors::{reconnect, ConnectorContext, ConnectorState, RawConnector_TO},
+    sink::SinkContext,
+    source::SourceContext,
+    Result,
 };
 
 use crate::{
-    source::{self, SourceManagerBuilder, SourceAddr},
     sink::{self},
+    source::{self},
 };
 
 // The higher level connector interface, which wraps the raw connector from the
@@ -24,10 +25,8 @@ impl Connector {
         source_context: SourceContext,
         builder: source::SourceManagerBuilder,
     ) -> Result<Option<source::SourceAddr>> {
-        match self.0.create_source(source_context) {
-            ROk(RSome(raw_source)) => {
-                builder.spawn(raw_source, source_context).map(Some)
-            },
+        match self.0.create_source(source_context.clone()) {
+            ROk(RSome(raw_source)) => builder.spawn(raw_source, source_context).map(Some),
             ROk(RNone) => Ok(None),
             RErr(err) => Err(err),
         }
@@ -35,8 +34,8 @@ impl Connector {
 
     pub async fn create_sink(
         &mut self,
-        sink_context: SinkContext,
-        builder: sink::SinkManagerBuilder,
+        _sink_context: SinkContext,
+        _builder: sink::SinkManagerBuilder,
     ) -> Result<Option<sink::SinkAddr>> {
         // NOTE: the structure should be almost the same as `create_source`
         unimplemented!("only sources are implemented for now")
