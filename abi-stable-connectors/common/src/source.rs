@@ -1,8 +1,6 @@
-use abi_stable::{StableAbi, std_types::RString};
-use std::time::Duration;
-use tokio::task;
+use abi_stable::{std_types::RString, StableAbi};
 
-use crate::{RResult, Result};
+use crate::RResult;
 
 // Stubs for the original trait. We can't use `()` because it's not FFI-safe.
 #[repr(C)]

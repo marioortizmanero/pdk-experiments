@@ -1,17 +1,18 @@
-#![allow(
-    non_upper_case_globals,
-    non_camel_case_types,
-)] // For warnings inside `abi_stable` derives
+#![allow(non_upper_case_globals, non_camel_case_types)] // For warnings inside `abi_stable` derives
 
 pub mod connectors;
-pub mod source;
-pub mod sink;
 pub mod reconnect;
+pub mod sink;
+pub mod source;
 mod wrappers;
 
 use abi_stable::{
-    declare_root_module_statics, library::RootModule, package_version_strings,
-    sabi_types::VersionStrings, std_types::{RBox, RString}, StableAbi,
+    declare_root_module_statics,
+    library::RootModule,
+    package_version_strings,
+    sabi_types::VersionStrings,
+    std_types::{RBox, RString},
+    StableAbi,
 };
 
 use crate::connectors::RawConnector_TO;

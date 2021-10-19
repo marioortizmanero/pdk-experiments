@@ -35,18 +35,21 @@
 // Sorry for getting your hopes up lol. For the millionth time in a row, it's
 // not as easy as I thought.
 
-use abi_stable::{std_types::{
-    RBox,
-    ROption::{self, RNone, RSome},
-    RResult::{RErr, ROk},
-    RStr, RString,
-}, StableAbi};
+use abi_stable::{
+    std_types::{
+        RBox,
+        ROption::{self, RNone},
+        RResult::ROk,
+        RStr, RString,
+    },
+    StableAbi,
+};
 
 use crate::{
-    RResult,
-    source::{self, SourceContext, RawSource_TO},
     reconnect,
-    sink::{self, SinkContext, RawSink_TO},
+    sink::{RawSink_TO, SinkContext},
+    source::{RawSource_TO, SourceContext},
+    RResult,
 };
 
 // For more complex types we need to wrap them as opaque types.

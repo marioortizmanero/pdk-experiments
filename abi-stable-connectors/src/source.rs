@@ -3,7 +3,7 @@ use std::time::Duration;
 use tokio::{task, time};
 
 use common_abi_stable_connectors::{
-    source::{RawSource, RawSource_TO, SourceContext, SourceReply},
+    source::{RawSource_TO, SourceContext, SourceReply},
     Result,
 };
 
@@ -45,7 +45,7 @@ impl SourceManager {
                     println!("Sending '{}' to pipeline", data)
                 }
                 SourceReply::Sleep(ms) => {
-                    time::sleep(Duration::from_millis(ms));
+                    time::sleep(Duration::from_millis(ms)).await;
                 }
             }
         }

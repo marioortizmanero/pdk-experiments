@@ -5,7 +5,8 @@ use abi_stable::std_types::{
 };
 
 use common_abi_stable_connectors::{
-    connectors::{reconnect, ConnectorContext, ConnectorState, RawConnector_TO},
+    connectors::{ConnectorContext, ConnectorState, RawConnector_TO},
+    reconnect,
     sink::SinkContext,
     source::SourceContext,
     Result,

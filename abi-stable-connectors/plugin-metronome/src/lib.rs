@@ -6,7 +6,7 @@ use abi_stable::{
         RBox,
         ROption::{self, RSome},
         RResult::ROk,
-        RStr, RString,
+        RStr,
     },
     type_level::downcasting::TD_Opaque,
 };
@@ -18,23 +18,12 @@ use common_abi_stable_connectors::{
     ConnectorMod, ConnectorMod_Ref, RResult,
 };
 
-use std::time::SystemTime;
+use std::time::{Duration, Instant};
 
-/// Get a nanosecond timestamp
-#[must_use]
-#[allow(clippy::cast_possible_truncation)]
-pub fn nanotime() -> u64 {
-    // TODO we want to turn this into u128 eventually
-    SystemTime::now()
-        .duration_since(SystemTime::UNIX_EPOCH)
-        // ALLOW: If this happens, now() is BEFORE the unix epoch, this is so bad panicing is the least of our problems
-        .expect("Our time was before the unix epoc, this is really bad!")
-        .as_nanos() as u64
-}
-
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 struct Metronome {
-    next: u64,
+    interval: Duration,
+    next: Instant,
 }
 
 impl RawConnector for Metronome {
@@ -70,12 +59,15 @@ impl RawConnector for Metronome {
 
 impl RawSource for Metronome {
     fn pull_data(&mut self, _pull_id: u64, _ctx: &SourceContext) -> RResult<SourceReply> {
-        let now = nanotime();
+        let now = Instant::now();
         if self.next < now {
-            let data = RString::new();
-            ROk(SourceReply::Data(data))
+            self.next = now + self.interval;
+
+            let data = format!("Next event at {:?}, now {:?}", self.next, now);
+            ROk(SourceReply::Data(data.into()))
         } else {
-            ROk(SourceReply::Sleep(self.next - now))
+            let remaining = (self.next - now).as_millis() as u64;
+            ROk(SourceReply::Sleep(remaining))
         }
     }
 
@@ -94,7 +86,10 @@ fn instantiate_root_module() -> ConnectorMod_Ref {
 
 #[sabi_extern_fn]
 pub fn new() -> RawConnector_TO<'static, RBox<()>> {
-    let metronome = Metronome::default();
+    let metronome = Metronome {
+        interval: Duration::from_secs(1),
+        next: Instant::now(),
+    };
     // We don't need to be able to downcast the connector back to the original
     // type, so we just pass it as an opaque type.
     RawConnector_TO::from_value(metronome, TD_Opaque)

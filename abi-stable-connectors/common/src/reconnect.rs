@@ -1,4 +1,4 @@
-use super::{StableAbi, RString};
+use super::{RString, StableAbi};
 
 #[repr(C)]
 #[derive(StableAbi, Default)]

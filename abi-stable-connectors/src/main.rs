@@ -3,7 +3,7 @@ use abi_stable_connectors::run_plugin;
 use std::{env, process};
 
 fn usage() {
-    println!("Usage: ./main PLUGIN_DIR");
+    println!("Usage: ./main PLUGIN_PATH");
 }
 
 fn main() {

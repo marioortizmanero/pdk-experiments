@@ -1,5 +1,5 @@
 use abi_stable::{
-    std_types::{RBox, RString, ROption},
+    std_types::{RBox, ROption, RString},
     StableAbi,
 };
 
