@@ -20,7 +20,7 @@ use common_abi_stable_connectors::{
 };
 
 use std::{
-    panic,
+    panic::{self, AssertUnwindSafe},
     time::{Duration, Instant},
 };
 
@@ -69,35 +69,38 @@ impl RawConnector for Metronome {
 }
 
 impl RawSource for Metronome {
-    /// NOTE: Unfortunately, mutable types are not panic-safe, which means that
-    /// they can't be used inside a `catch_unwind` closure:
+    /// NOTE: Unfortunately, mutable types are not panic-safe by default (they
+    /// don't implement `UnwindSafe`), which means that they can't just be used
+    /// inside a `catch_unwind` closure:
     ///
     /// https://doc.rust-lang.org/stable/std/panic/trait.UnwindSafe.html#who-implements-unwindsafe
     ///
-    /// This means that we have to use an ugly workaround to only apply
-    /// mutability afterwards.
+    /// There are two ways to approach this:
+    ///
+    /// * Use an ugly workaround to only apply mutability in a `.map` after the
+    ///   `catch_unwind` call.
+    /// * Use `AssertUnwindSafe` if we're sure we can guarantee that the code is
+    ///   *minimally* exception-safe, i.e. it doesn't violate memory safety in
+    ///   case a panic occurs (https://doc.rust-lang.org/nomicon/exception-safety.html#exception-safety).
+    ///
+    ///   Safe code can never cause undefined behaviour during unwinding, so we
+    ///   can just use `AssertUnwindSafe` in this case.
     fn pull_data(&mut self, _pull_id: u64, _ctx: &SourceContext) -> MayPanic<RResult<SourceReply>> {
-        panic::catch_unwind(|| {
+        panic::catch_unwind(AssertUnwindSafe(|| {
             // Even though this functionality may seem simple and panic-free,
             // it could occur in the addition operation, for example.
             let now = Instant::now();
             if self.next < now {
-                let next_value = now + self.interval;
-                let data = format!("Next event at {:?}, now {:?}", next_value, now);
+                self.next = now + self.interval;
+                let data = format!("Next event at {:?}, now {:?}", self.next, now);
 
-                (next_value, SourceReply::Data(data.into()))
+                ROk(SourceReply::Data(data.into()))
             } else {
                 let remaining = (self.next - now).as_millis() as u64;
 
-                (self.next, SourceReply::Empty(remaining))
+                ROk(SourceReply::Empty(remaining))
             }
-        })
-        .map(|result| {
-            // Mutability is applied here, where we know there will be no panics
-            let (next_value, reply) = result;
-            self.next = next_value;
-            ROk(reply)
-        })
+        }))
         .into()
     }
 
