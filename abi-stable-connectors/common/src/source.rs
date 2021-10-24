@@ -10,8 +10,7 @@ pub struct SourceContext(RString);
 #[repr(C)]
 #[derive(StableAbi)]
 pub enum SourceReply {
-    Empty,
-    Sleep(u64),
+    Empty(u64), // contains the milliseconds to sleep for the next iteration
     Data(RString), // should be a vector of u8 or similars
 }
 

@@ -43,18 +43,19 @@ pub struct SourceManager {
 impl SourceManager {
     pub async fn run(mut self) -> Result<()> {
         // No communication for simplicity as well. This should actually send
-        // the messages to the pipeline.
+        // the messages to the `out` and `err` pipelines.
         loop {
             let data: Result<SourceReply> = self.source.pull_data(0, &self.ctx).into();
-            match data? {
-                SourceReply::Empty => {
-                    println!("No data available")
+            match data {
+                Ok(SourceReply::Empty(ms)) => {
+                    println!("No data available, sleeping {} ms", ms);
+                    time::sleep(Duration::from_millis(ms)).await;
                 }
-                SourceReply::Data(data) => {
+                Ok(SourceReply::Data(data)) => {
                     println!("Sending '{}' to pipeline", data)
                 }
-                SourceReply::Sleep(ms) => {
-                    time::sleep(Duration::from_millis(ms)).await;
+                Err(e) => {
+                    eprintln!("Error in source: {}", e);
                 }
             }
         }

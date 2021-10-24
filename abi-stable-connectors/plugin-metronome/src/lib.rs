@@ -67,7 +67,7 @@ impl RawSource for Metronome {
             ROk(SourceReply::Data(data.into()))
         } else {
             let remaining = (self.next - now).as_millis() as u64;
-            ROk(SourceReply::Sleep(remaining))
+            ROk(SourceReply::Empty(remaining))
         }
     }
 
