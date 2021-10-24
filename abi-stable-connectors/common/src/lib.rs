@@ -6,20 +6,21 @@ pub mod sink;
 pub mod source;
 mod wrappers;
 
+use crate::connectors::RawConnector_TO;
+
 use abi_stable::{
     declare_root_module_statics,
     library::RootModule,
     package_version_strings,
     sabi_types::VersionStrings,
-    std_types::{RBox, RString},
+    std_types::{RBox, RBoxError},
     StableAbi,
 };
 
-use crate::connectors::RawConnector_TO;
-
-// For ease of use
-pub type RResult<T> = abi_stable::std_types::RResult<T, RString>;
-pub type Result<T> = std::result::Result<T, RString>;
+// For ease of use. Both are equivalent, but `RResult` is used in the
+// `abi_stable` context.
+pub type RResult<T> = abi_stable::std_types::RResult<T, RBoxError>;
+pub type Result<T> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
 
 #[repr(C)]
 #[derive(StableAbi)]

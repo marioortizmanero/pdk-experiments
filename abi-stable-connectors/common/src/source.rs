@@ -14,6 +14,8 @@ pub enum SourceReply {
     Data(RString), // should be a vector of u8 or similars
 }
 
+// The source needs a trait object because it's now returned in the FFI
+// interface.
 #[abi_stable::sabi_trait]
 pub trait RawSource: Send {
     /// Pulls an event from the source if one exists

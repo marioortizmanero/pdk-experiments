@@ -23,11 +23,28 @@ impl SourceManagerBuilder {
         source: RawSource_TO<'static, RBox<()>>,
         ctx: SourceContext,
     ) -> Result<SourceAddr> {
+        let source = Source(source); // wrapping it up
         let manager = SourceManager { source, ctx };
         // spawn manager task
         task::spawn(manager.run());
 
         Ok(SourceAddr::default())
+    }
+}
+
+// Just like `Connector`, this wraps the FFI dynamic source with `abi_stable`
+// types so that it's easier to use with `std`.
+pub struct Source(pub RawSource_TO<'static, RBox<()>>);
+impl Source {
+    fn pull_data(&mut self, pull_id: u64, ctx: &SourceContext) -> Result<SourceReply> {
+        self.0
+            .pull_data(pull_id, ctx)
+            .map_err(Into::into) // RBoxError -> Box<dyn Error>
+            .into() // RResult -> Result
+    }
+
+    fn is_transactional(&self) -> bool {
+        self.0.is_transactional()
     }
 }
 
@@ -37,7 +54,7 @@ impl SourceManagerBuilder {
 //
 // Note that it uses `dyn` instead of generics now.
 pub struct SourceManager {
-    pub source: RawSource_TO<'static, RBox<()>>,
+    pub source: Source,
     pub ctx: SourceContext,
 }
 impl SourceManager {
@@ -45,7 +62,7 @@ impl SourceManager {
         // No communication for simplicity as well. This should actually send
         // the messages to the `out` and `err` pipelines.
         loop {
-            let data: Result<SourceReply> = self.source.pull_data(0, &self.ctx).into();
+            let data = self.source.pull_data(0, &self.ctx);
             match data {
                 Ok(SourceReply::Empty(ms)) => {
                     println!("No data available, sleeping {} ms", ms);

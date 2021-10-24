@@ -31,7 +31,7 @@ impl Connector {
         match self.0.create_source(source_context.clone()) {
             ROk(RSome(raw_source)) => builder.spawn(raw_source, source_context).map(Some),
             ROk(RNone) => Ok(None),
-            RErr(err) => Err(err),
+            RErr(err) => Err(err.into()),
         }
     }
 
@@ -49,11 +49,17 @@ impl Connector {
         ctx: &ConnectorContext,
         notifier: reconnect::ConnectionLostNotifier,
     ) -> Result<bool> {
-        self.0.connect(ctx, notifier).into()
+        self.0
+            .connect(ctx, notifier)
+            .map_err(Into::into) // RBoxError -> Box<dyn Error>
+            .into() // RResult -> Result
     }
 
     pub async fn on_start(&mut self, ctx: &ConnectorContext) -> Result<ConnectorState> {
-        self.0.on_start(ctx).into()
+        self.0
+            .on_start(ctx)
+            .map_err(Into::into) // RBoxError -> Box<dyn Error>
+            .into() // RResult -> Result
     }
 
     pub async fn on_pause(&mut self, ctx: &ConnectorContext) {
