@@ -24,7 +24,7 @@ use common_abi_stable_connectors::{
 //
 // Note that the implementaion currently ignores the `MayPanic` types by
 // unwrapping them, but this should be handled gracefully to avoid aborting the
-// runtime. This is safe because the `unwrap` here happens in the runtime rather
+// runtime. This is safe because the panic will occur here in the runtime rather
 // than in the plugin.
 pub struct Connector(pub RawConnector_TO<'static, RBox<()>>);
 impl Connector {

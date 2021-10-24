@@ -24,6 +24,9 @@ use std::{
     time::{Duration, Instant},
 };
 
+// Note that the struct itself in the plugin doesn't need to use `abi_stable`,
+// since we're using `dyn RawConnector` as the public interface rather than
+// `Metronome`.
 #[derive(Clone, Debug)]
 struct Metronome {
     interval: Duration,
@@ -66,17 +69,36 @@ impl RawConnector for Metronome {
 }
 
 impl RawSource for Metronome {
-    fn pull_data(&mut self, _pull_id: u64, _ctx: &SourceContext) -> RResult<SourceReply> {
-        let now = Instant::now();
-        if self.next < now {
-            self.next = now + self.interval;
+    /// NOTE: Unfortunately, mutable types are not panic-safe, which means that
+    /// they can't be used inside a `catch_unwind` closure:
+    ///
+    /// https://doc.rust-lang.org/stable/std/panic/trait.UnwindSafe.html#who-implements-unwindsafe
+    ///
+    /// This means that we have to use an ugly workaround to only apply
+    /// mutability afterwards.
+    fn pull_data(&mut self, _pull_id: u64, _ctx: &SourceContext) -> MayPanic<RResult<SourceReply>> {
+        panic::catch_unwind(|| {
+            // Even though this functionality may seem simple and panic-free,
+            // it could occur in the addition operation, for example.
+            let now = Instant::now();
+            if self.next < now {
+                let next_value = now + self.interval;
+                let data = format!("Next event at {:?}, now {:?}", next_value, now);
 
-            let data = format!("Next event at {:?}, now {:?}", self.next, now);
-            ROk(SourceReply::Data(data.into()))
-        } else {
-            let remaining = (self.next - now).as_millis() as u64;
-            ROk(SourceReply::Empty(remaining))
-        }
+                (next_value, SourceReply::Data(data.into()))
+            } else {
+                let remaining = (self.next - now).as_millis() as u64;
+
+                (self.next, SourceReply::Empty(remaining))
+            }
+        })
+        .map(|result| {
+            // Mutability is applied here, where we know there will be no panics
+            let (next_value, reply) = result;
+            self.next = next_value;
+            ROk(reply)
+        })
+        .into()
     }
 
     fn is_transactional(&self) -> bool {

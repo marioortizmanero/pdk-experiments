@@ -1,6 +1,6 @@
 use abi_stable::{std_types::RString, StableAbi};
 
-use crate::RResult;
+use crate::{RResult, util::MayPanic};
 
 // Stubs for the original trait. We can't use `()` because it's not FFI-safe.
 #[repr(C)]
@@ -20,7 +20,7 @@ pub enum SourceReply {
 pub trait RawSource: Send {
     /// Pulls an event from the source if one exists
     /// determine the codec to be used
-    fn pull_data(&mut self, pull_id: u64, ctx: &SourceContext) -> RResult<SourceReply>;
+    fn pull_data(&mut self, pull_id: u64, ctx: &SourceContext) -> MayPanic<RResult<SourceReply>>;
 
     /// Is this source transactional or can acks/fails be ignored
     fn is_transactional(&self) -> bool {

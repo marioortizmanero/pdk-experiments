@@ -1,6 +1,7 @@
-# native-codec
+# abi-stable-connectors
 
-This example is equivalent to dynamic-codec, but written natively in Rust and
-loaded statically. It tries to follow a similar architecture for benchmarking.
+This example represents the Tremor architecture at a small and simplified scale.
+It implements the proposed plugins system with a few interesting ideas such as
+panic handling and complex types, thanks to the `abi_stable` crate.
 
-Based on commit 13526d8.
+Based on commit 13526d8 (connectors branch).

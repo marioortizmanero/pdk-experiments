@@ -39,6 +39,7 @@ impl Source {
     fn pull_data(&mut self, pull_id: u64, ctx: &SourceContext) -> Result<SourceReply> {
         self.0
             .pull_data(pull_id, ctx)
+            .unwrap()
             .map_err(Into::into) // RBoxError -> Box<dyn Error>
             .into() // RResult -> Result
     }
