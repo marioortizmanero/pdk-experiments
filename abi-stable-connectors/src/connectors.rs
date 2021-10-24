@@ -1,9 +1,10 @@
+use crate::{sink, source};
+
 use abi_stable::std_types::{
     RBox,
     ROption::{RNone, RSome},
     RResult::{RErr, ROk},
 };
-
 use common_abi_stable_connectors::{
     connectors::{ConnectorContext, ConnectorState, RawConnector_TO},
     reconnect,
@@ -12,13 +13,14 @@ use common_abi_stable_connectors::{
     Result,
 };
 
-use crate::{
-    sink::{self},
-    source::{self},
-};
-
 // The higher level connector interface, which wraps the raw connector from the
-// plugin.
+// plugin. This is only needed in the runtime itself because the common library
+// only needs the basic components that are shared.
+//
+// This may introduce a very small overhead in some cases, so maybe it's worth
+// not converting types from `abi_stable` into `std` (it's not really so bad).
+// For functions like `create_source` and similars it's not worth it because
+// they're only ran once.
 pub struct Connector(pub RawConnector_TO<'static, RBox<()>>);
 impl Connector {
     pub async fn create_source(
@@ -38,7 +40,7 @@ impl Connector {
         _sink_context: SinkContext,
         _builder: sink::SinkManagerBuilder,
     ) -> Result<Option<sink::SinkAddr>> {
-        // NOTE: the structure should be almost the same as `create_source`
+        // TODO: the structure should be almost the same as `create_source`
         unimplemented!("only sources are implemented for now")
     }
 

@@ -7,9 +7,14 @@ use common_abi_stable_connectors::{
     Result,
 };
 
+// This is actually saved in the `SourceManager`, and it's used in order to
+// communicate with the pipeline (start/pause/link/etc). So in this example it's
+// just a stub.
 #[derive(Default)]
 pub struct SourceAddr(String);
 
+/// Works the same way as tremor's builder for sources: it's simply used to
+/// spawn it into a separate task.
 #[derive(Default)]
 pub struct SourceManagerBuilder;
 impl SourceManagerBuilder {
@@ -26,7 +31,9 @@ impl SourceManagerBuilder {
     }
 }
 
-// The runner of the source
+// The runner of the source, which pulls the events continuously. This could be
+// made async so that internal operations aren't blocking thanks to the crate
+// `async_ffi`, but I'll leave it like that for now for simplicity.
 //
 // Note that it uses `dyn` instead of generics now.
 pub struct SourceManager {
@@ -35,6 +42,8 @@ pub struct SourceManager {
 }
 impl SourceManager {
     pub async fn run(mut self) -> Result<()> {
+        // No communication for simplicity as well. This should actually send
+        // the messages to the pipeline.
         loop {
             let data: Result<SourceReply> = self.source.pull_data(0, &self.ctx).into();
             match data? {

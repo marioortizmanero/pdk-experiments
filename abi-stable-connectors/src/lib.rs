@@ -1,5 +1,4 @@
-//! The plugin is given with its full path instead of a directory for more
-//! reliable benchmarking.
+#![allow(dead_code)] // Prototyping
 
 mod connectors;
 mod sink;
@@ -17,25 +16,31 @@ use tokio::time;
 /// ran when calling the returned closure.
 #[tokio::main]
 pub async fn run_plugin(path: &str) -> Result<()> {
+    // This entire function will act as the `connector_task` function in the
+    // `ConnectorManager`.
     let plugin = ConnectorMod_Ref::load_from_file(path.as_ref())?;
 
-    // First we obtain the function pointer, which may fail in case the plugin
-    // is incorrectly implemented.
+    // First we obtain the pointer to the initialization function, which may
+    // fail in case the plugin is incorrectly implemented.
     let new_fn = plugin
         .new()
         .ok_or_else(|| anyhow!("method `new` not found"))?;
 
-    // We initialize the plugin, obtaining a state.
+    // We initialize the plugin, obtaining a raw dynamic connector type. In
+    // order to use it easily from now on, we wrap it under a `Connector`
+    // concrete type.
     let raw_connector = new_fn();
     let mut connector = Connector(raw_connector);
     println!("Default codec: {}", connector.default_codec());
 
-    let builder = SourceManagerBuilder::default();
-    let context = SourceContext::default();
+    let builder = SourceManagerBuilder::default(); // Spawns source in task
+    let context = SourceContext::default(); // Stub for now
     let source_addr = connector
         .create_source(context, builder)
         .await
         .map_err(|e| anyhow!(e))?;
+
+    // The plugin doesn't necessarily have to export a source.
     match source_addr {
         Some(_addr) => {
             // This part of the program acts as the `ConnectorManager`. For
