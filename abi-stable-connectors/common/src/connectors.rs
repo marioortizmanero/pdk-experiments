@@ -48,6 +48,7 @@ use crate::{
     sink::{RawSink_TO, SinkContext},
     source::{RawSource_TO, SourceContext},
     RResult,
+    util::MayPanic::{self, NoPanic}
 };
 
 // For more complex types we need to wrap them as opaque types.
@@ -72,14 +73,14 @@ pub trait RawConnector: Send {
     fn create_source(
         &mut self,
         _source_context: SourceContext,
-    ) -> RResult<ROption<RawSource_TO<'static, RBox<()>>>> {
-        ROk(RNone)
+    ) -> MayPanic<RResult<ROption<RawSource_TO<'static, RBox<()>>>>> {
+        NoPanic(ROk(RNone))
     }
 
     fn create_sink(
         &mut self,
         _sink_context: SinkContext,
-    ) -> RResult<ROption<RawSink_TO<'static, RBox<()>>>> {
+    ) -> MayPanic<RResult<ROption<RawSink_TO<'static, RBox<()>>>>> {
         unimplemented!("only sources are implemented for now")
     }
 
@@ -88,17 +89,23 @@ pub trait RawConnector: Send {
         &mut self,
         ctx: &ConnectorContext,
         notifier: reconnect::ConnectionLostNotifier,
-    ) -> RResult<bool>;
+    ) -> MayPanic<RResult<bool>>;
 
     /* async */
-    fn on_start(&mut self, ctx: &ConnectorContext) -> RResult<ConnectorState>;
+    fn on_start(&mut self, ctx: &ConnectorContext) -> MayPanic<RResult<ConnectorState>>;
 
     /* async */
-    fn on_pause(&mut self, _ctx: &ConnectorContext) {}
+    fn on_pause(&mut self, _ctx: &ConnectorContext) -> MayPanic<()> {
+        NoPanic(())
+    }
     /* async */
-    fn on_resume(&mut self, _ctx: &ConnectorContext) {}
+    fn on_resume(&mut self, _ctx: &ConnectorContext) -> MayPanic<()> {
+        NoPanic(())
+    }
     /* async */
-    fn on_stop(&mut self, _ctx: &ConnectorContext) {}
+    fn on_stop(&mut self, _ctx: &ConnectorContext) -> MayPanic<()> {
+        NoPanic(())
+    }
 
     fn default_codec(&self) -> RStr<'_>;
 }

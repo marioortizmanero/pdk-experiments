@@ -14,3 +14,4 @@ crate-type = ["cdylib"]
 [dependencies]
 abi_stable = "0.10"
 common-abi-stable-connectors = { version = "0.1.0", path = "../common" }
+thiserror = "1.0"

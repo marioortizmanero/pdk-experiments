@@ -15,10 +15,14 @@ use common_abi_stable_connectors::{
     connectors::{ConnectorContext, ConnectorState, RawConnector, RawConnector_TO},
     reconnect,
     source::{RawSource, RawSource_TO, SourceContext, SourceReply},
+    util::MayPanic::{self, NoPanic},
     ConnectorMod, ConnectorMod_Ref, RResult,
 };
 
-use std::time::{Duration, Instant};
+use std::{
+    panic,
+    time::{Duration, Instant},
+};
 
 #[derive(Clone, Debug)]
 struct Metronome {
@@ -27,15 +31,19 @@ struct Metronome {
 }
 
 impl RawConnector for Metronome {
-    // TODO: remove `RResult` here?
     fn create_source(
         &mut self,
         _source_context: SourceContext,
-    ) -> RResult<ROption<RawSource_TO<'static, RBox<()>>>> {
-        let metronome = self.clone();
-        // We don't need to be able to downcast the connector back to the original
-        // type, so we just pass it as an opaque type.
-        ROk(RSome(RawSource_TO::from_value(metronome, TD_Opaque)))
+    ) -> MayPanic<RResult<ROption<RawSource_TO<'static, RBox<()>>>>> {
+        // NOTE: we don't want panics through FFI! That would be undefined
+        // behaviour, so we have to handle them -- manually for now.
+        panic::catch_unwind(|| {
+            let metronome = self.clone();
+            // We don't need to be able to downcast the connector back to the original
+            // type, so we just pass it as an opaque type.
+            ROk(RSome(RawSource_TO::from_value(metronome, TD_Opaque)))
+        })
+        .into()
     }
 
     /* async */
@@ -43,13 +51,13 @@ impl RawConnector for Metronome {
         &mut self,
         _ctx: &ConnectorContext,
         _notifier: reconnect::ConnectionLostNotifier,
-    ) -> RResult<bool> {
-        ROk(true)
+    ) -> MayPanic<RResult<bool>> {
+        NoPanic(ROk(true))
     }
 
     /* async */
-    fn on_start(&mut self, _ctx: &ConnectorContext) -> RResult<ConnectorState> {
-        ROk(ConnectorState::default())
+    fn on_start(&mut self, _ctx: &ConnectorContext) -> MayPanic<RResult<ConnectorState>> {
+        NoPanic(ROk(ConnectorState::default()))
     }
 
     fn default_codec(&self) -> RStr<'_> {

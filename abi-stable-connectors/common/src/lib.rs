@@ -4,6 +4,7 @@ pub mod connectors;
 pub mod reconnect;
 pub mod sink;
 pub mod source;
+pub mod util;
 mod wrappers;
 
 use crate::connectors::RawConnector_TO;

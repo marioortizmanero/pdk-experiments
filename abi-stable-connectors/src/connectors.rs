@@ -21,6 +21,11 @@ use common_abi_stable_connectors::{
 // not converting types from `abi_stable` into `std` (it's not really so bad).
 // For functions like `create_source` and similars it's not worth it because
 // they're only ran once.
+//
+// Note that the implementaion currently ignores the `MayPanic` types by
+// unwrapping them, but this should be handled gracefully to avoid aborting the
+// runtime. This is safe because the `unwrap` here happens in the runtime rather
+// than in the plugin.
 pub struct Connector(pub RawConnector_TO<'static, RBox<()>>);
 impl Connector {
     pub async fn create_source(
@@ -28,7 +33,7 @@ impl Connector {
         source_context: SourceContext,
         builder: source::SourceManagerBuilder,
     ) -> Result<Option<source::SourceAddr>> {
-        match self.0.create_source(source_context.clone()) {
+        match self.0.create_source(source_context.clone()).unwrap() {
             ROk(RSome(raw_source)) => builder.spawn(raw_source, source_context).map(Some),
             ROk(RNone) => Ok(None),
             RErr(err) => Err(err.into()),
@@ -51,6 +56,7 @@ impl Connector {
     ) -> Result<bool> {
         self.0
             .connect(ctx, notifier)
+            .unwrap()
             .map_err(Into::into) // RBoxError -> Box<dyn Error>
             .into() // RResult -> Result
     }
@@ -58,20 +64,21 @@ impl Connector {
     pub async fn on_start(&mut self, ctx: &ConnectorContext) -> Result<ConnectorState> {
         self.0
             .on_start(ctx)
+            .unwrap()
             .map_err(Into::into) // RBoxError -> Box<dyn Error>
             .into() // RResult -> Result
     }
 
     pub async fn on_pause(&mut self, ctx: &ConnectorContext) {
-        self.0.on_pause(ctx)
+        self.0.on_pause(ctx).unwrap()
     }
 
     pub async fn on_resume(&mut self, ctx: &ConnectorContext) {
-        self.0.on_resume(ctx)
+        self.0.on_resume(ctx).unwrap()
     }
 
     pub async fn on_stop(&mut self, ctx: &ConnectorContext) {
-        self.0.on_stop(ctx)
+        self.0.on_stop(ctx).unwrap()
     }
 
     pub fn default_codec(&self) -> &str {
