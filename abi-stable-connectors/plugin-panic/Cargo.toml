@@ -1,5 +1,5 @@
 [package]
-name = "plugin-metronome"
+name = "plugin-panic"
 version = "0.1.0"
 edition = "2018"
 
@@ -8,7 +8,7 @@ edition = "2018"
 # * https://doc.rust-lang.org/cargo/reference/cargo-targets.html#the-crate-type-field
 # * https://doc.rust-lang.org/reference/linkage.html
 [lib]
-name = "metronome"
+name = "panic"
 crate-type = ["cdylib"]
 
 [dependencies]
