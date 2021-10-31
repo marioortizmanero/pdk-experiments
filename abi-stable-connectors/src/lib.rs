@@ -43,31 +43,31 @@ pub async fn run_plugin(path: &str) -> Result<()> {
     let mut connector = Connector(raw_connector);
     println!("Default codec: {}", connector.default_codec());
 
+    // Note that plugins don't necessarily have to export a sink or source
     launch_source(&mut connector).await?;
     launch_sink(&mut connector).await?;
+
+    // Since there's no communication with the source or sink, we'll just leave
+    // them running for a few seconds for the demo.
+    println!(
+        "The runtime will now wait for 15 seconds with the source and sink \
+            running in a separate task."
+    );
+    time::sleep(Duration::from_secs(15)).await;
+    println!("Stopping");
 
     Ok(())
 }
 
 async fn launch_source(connector: &mut Connector) -> Result<()> {
+    // The builder will already spawn the source in a separate task.
     let source_builder = SourceManagerBuilder::default(); // Spawns source in task
     let source_context = SourceContext::default(); // Stub for now
-    let source_addr = connector
+
+    connector
         .create_source(source_context, source_builder)
         .await
         .map_err(|e| anyhow!(e))?;
-
-    // The plugin doesn't necessarily have to export a source.
-    match source_addr {
-        Some(_addr) => {
-            println!(
-                "Source detected in plugin. It'll run for 10 seconds in a \
-                     separate task starting now."
-            );
-            time::sleep(Duration::from_secs(10)).await
-        }
-        None => println!("No source in plugin"),
-    }
 
     Ok(())
 }
@@ -82,29 +82,14 @@ async fn launch_sink(connector: &mut Connector) -> Result<()> {
     let serializer = EventSerializer::build();
     let serializer = RawEventSerializer_TO::from_value(serializer, TD_Opaque);
 
+    // The builder will already spawn the source in a separate task.
     let sink_builder = SinkManagerBuilder { serializer }; // Spawns source in task
     let sink_context = SinkContext::default(); // Stub for now
-    let sink_addr = connector
+
+    connector
         .create_sink(sink_context, sink_builder)
         .await
         .map_err(|e| anyhow!(e))?;
-
-    // The plugin doesn't necessarily have to export a sink.
-    match sink_addr {
-        Some(_addr) => {
-            // This part of the program acts as the `ConnectorManager`. For
-            // simplicity's sake, the `source_addr` is actually useless, so we
-            // don't have a way to communicate between the source and the
-            // connector. Thus, the source can't be stopped with a message, and
-            // it'll just work with a `sleep` in this example.
-            println!(
-                "Source detected in plugin. It'll run for 10 seconds in a \
-                     separate task starting now."
-            );
-            time::sleep(Duration::from_secs(10)).await
-        }
-        None => println!("No source in plugin"),
-    }
 
     Ok(())
 }

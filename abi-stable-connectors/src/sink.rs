@@ -99,7 +99,7 @@ impl SinkManager {
         println!("The sink reads line events from console! Try writing a line to stdin.");
         let mut id = 0;
         loop {
-            // Generating an event
+            // Generating an event, only one at a time for now
             let mut input = String::new();
             stdin.read_line(&mut input).await?;
             let data = Value::String(input.into());

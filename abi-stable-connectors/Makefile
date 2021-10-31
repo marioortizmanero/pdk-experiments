@@ -19,5 +19,12 @@ release-panic:
 	cd plugin-panic && cargo build --release
 	cargo run --release -- plugin-panic/target/release/libpanic.so
 
+debug-reverse:
+	cd plugin-reverse && cargo build
+	cargo run -- plugin-reverse/target/debug/libreverse.so
+release-reverse:
+	cd plugin-reverse && cargo build --release
+	cargo run --release -- plugin-reverse/target/release/libreverse.so
+
 clean:
 	rm -rf target plugin-sample/target

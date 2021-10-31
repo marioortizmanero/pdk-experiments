@@ -7,10 +7,19 @@ use abi_stable::{std_types::{RString, RStr, RVec, RResult::ROk}, StableAbi, rvec
 #[derive(StableAbi, Default, Clone)]
 pub struct SinkContext(RString);
 
-// Stub for now
 #[repr(C)]
-#[derive(StableAbi, Default, Debug)]
-pub struct SinkReply(RString);
+#[derive(StableAbi, Debug)]
+pub enum SinkReply {
+    /// no reply - maybe no reply yet, maybe replies come asynchronously...
+    None,
+    /// everything went smoothly, chill
+    Ack,
+    /// shit hit the fan, but only for this event, nothing big
+    Fail,
+    /// the whole sink became unavailable or available again
+    /// NOTE: simplified for now
+    CB,
+}
 
 /// Result for a sink function that may provide insights or response.
 ///
