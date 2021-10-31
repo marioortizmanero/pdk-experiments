@@ -10,8 +10,8 @@ use abi_stable::StableAbi;
 /// the contents returned by `catch_unwind` are just `dyn Any` and don't provide
 /// much value, they're discarded.
 ///
-/// Hopefully we will be able to remove this workaround as soon as the
-/// `C-unwind`:
+/// Hopefully we will be able to remove this workaround as soon as `C-unwind` is
+/// stabilized, as it may introduce some overhead:
 ///
 /// https://rust-lang.github.io/rfcs/2945-c-unwind-abi.html
 #[repr(C)]

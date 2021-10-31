@@ -36,6 +36,7 @@ impl SourceManagerBuilder {
 // types so that it's easier to use with `std`.
 pub struct Source(pub RawSource_TO<'static, RBox<()>>);
 impl Source {
+    #[inline]
     pub fn pull_data(&mut self, pull_id: u64, ctx: &SourceContext) -> Result<SourceReply> {
         self.0
             .pull_data(pull_id, ctx)
@@ -44,6 +45,7 @@ impl Source {
             .into() // RResult -> Result
     }
 
+    #[inline]
     pub fn is_transactional(&self) -> bool {
         self.0.is_transactional()
     }

@@ -28,6 +28,7 @@ use common_abi_stable_connectors::{
 // in the runtime rather than in the plugin.
 pub struct Connector(pub RawConnector_TO<'static, RBox<()>>);
 impl Connector {
+    #[inline]
     pub async fn create_source(
         &mut self,
         source_context: SourceContext,
@@ -40,6 +41,7 @@ impl Connector {
         }
     }
 
+    #[inline]
     pub async fn create_sink(
         &mut self,
         sink_context: SinkContext,
@@ -52,6 +54,7 @@ impl Connector {
         }
     }
 
+    #[inline]
     pub async fn connect(
         &mut self,
         ctx: &ConnectorContext,
@@ -64,6 +67,7 @@ impl Connector {
             .into() // RResult -> Result
     }
 
+    #[inline]
     pub async fn on_start(&mut self, ctx: &ConnectorContext) -> Result<ConnectorState> {
         self.0
             .on_start(ctx)
@@ -72,18 +76,22 @@ impl Connector {
             .into() // RResult -> Result
     }
 
+    #[inline]
     pub async fn on_pause(&mut self, ctx: &ConnectorContext) {
         self.0.on_pause(ctx).unwrap()
     }
 
+    #[inline]
     pub async fn on_resume(&mut self, ctx: &ConnectorContext) {
         self.0.on_resume(ctx).unwrap()
     }
 
+    #[inline]
     pub async fn on_stop(&mut self, ctx: &ConnectorContext) {
         self.0.on_stop(ctx).unwrap()
     }
 
+    #[inline]
     pub fn default_codec(&self) -> &str {
         self.0.default_codec().into()
     }

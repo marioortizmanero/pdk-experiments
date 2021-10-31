@@ -43,6 +43,7 @@ pub type ResultVec = Result<Vec<SinkReply>>;
 // types so that it's easier to use with `std`.
 pub struct Sink(pub RawSink_TO<'static, RBox<()>>);
 impl Sink {
+    #[inline]
     pub fn on_event(
         &mut self,
         input: &str,
@@ -59,6 +60,7 @@ impl Sink {
             .into() // RResult -> Result
     }
 
+    #[inline]
     pub fn on_signal(
         &mut self,
         signal: Event,
@@ -73,10 +75,12 @@ impl Sink {
             .into() // RResult -> Result
     }
 
+    #[inline]
     pub fn auto_ack(&self) -> bool {
         self.0.auto_ack()
     }
 
+    #[inline]
     pub fn asynchronous(&self) -> bool {
         self.0.asynchronous()
     }
