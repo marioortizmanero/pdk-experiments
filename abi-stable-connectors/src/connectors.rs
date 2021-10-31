@@ -42,11 +42,14 @@ impl Connector {
 
     pub async fn create_sink(
         &mut self,
-        _sink_context: SinkContext,
-        _builder: sink::SinkManagerBuilder,
+        sink_context: SinkContext,
+        builder: sink::SinkManagerBuilder,
     ) -> Result<Option<sink::SinkAddr>> {
-        // TODO: the structure should be almost the same as `create_source`
-        unimplemented!("only sources are implemented for now")
+        match self.0.create_sink(sink_context.clone()).unwrap() {
+            ROk(RSome(raw_sink)) => builder.spawn(raw_sink, sink_context).map(Some),
+            ROk(RNone) => Ok(None),
+            RErr(err) => Err(err.into()),
+        }
     }
 
     pub async fn connect(

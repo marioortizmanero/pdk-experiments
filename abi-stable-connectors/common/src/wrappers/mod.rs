@@ -1,3 +1,10 @@
+//! This showcases how even with external and complex types not supported by
+//! `abi_stable` by defalut, it's still possible to create a stable ABI.
+//!
+//! This is thanks to opaque types: instead of using the original type as we
+//! normally would, we write its functionality as a trait and then use it with
+//! `dyn`.
+
 use abi_stable::{
     std_types::{RBox, ROption, RString},
     StableAbi,
@@ -13,8 +20,8 @@ pub struct ConnectorContext {
     pub url: RString,
     /// type name of the connector
     pub type_name: RString,
-    /// oh no! there's no `serde_yaml::Value` in `abi_stable`, we can't
-    /// `#[derive(StableAbi)]`!
+    /// oh no! there's no `serde_yaml::Value` in `abi_stable`, so we can't just
+    /// add `#[derive(StableAbi)]` to `ConnectorContext`!
     ///
     /// Solution: using its opaque alternative
     pub enabled: Value_TO<'static, RBox<()>>,
