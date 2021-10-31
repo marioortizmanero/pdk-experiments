@@ -81,7 +81,7 @@ pub trait RawConnector: Send {
         &mut self,
         _sink_context: SinkContext,
     ) -> MayPanic<RResult<ROption<RawSink_TO<'static, RBox<()>>>>> {
-        unimplemented!("only sources are implemented for now")
+        NoPanic(ROk(RNone))
     }
 
     /* async */

@@ -52,8 +52,6 @@ impl Source {
 // The runner of the source, which pulls the events continuously. This could be
 // made async so that internal operations aren't blocking thanks to the crate
 // `async_ffi`, but I'll leave it like that for now for simplicity.
-//
-// Note that it uses `dyn` instead of generics now.
 pub struct SourceManager {
     pub source: Source,
     pub ctx: SourceContext,

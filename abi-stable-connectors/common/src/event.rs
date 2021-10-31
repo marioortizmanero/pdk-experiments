@@ -3,34 +3,31 @@ use crate::{Result, RResult, value::Value, DEFAULT_STREAM_ID};
 use abi_stable::{StableAbi, std_types::{RBox, RVec, RString, RResult::ROk}};
 
 #[repr(C)]
-#[derive(StableAbi, Default)]
+#[derive(StableAbi)]
 pub struct Event {
     /// The event ID
     pub id: i32,
 
     // The rest was simpified, as it's not really necessary for this example
+    pub data: Value,
 }
 
 // The event serializer is an opaque type because it's simpler than trying to
 // make it `abi_stable`-compatible.
 //
-// Anyway, for this example it's quite simplified.
-pub struct EventSerializer {
-    postprocessor_names: Vec<String>,
-}
+// Anyway, for this example it's just a stub.
+pub struct EventSerializer(String);
 
 // This is just the constructor, so it doesn't need to be in the trait for the
 // opaque type.
 impl EventSerializer {
-    pub fn build(
-        postprocessor_names: Vec<String>,
-    ) -> Result<Self> {
-        Ok(Self { postprocessor_names })
+    pub fn build() -> Self {
+        Self(String::new())
     }
 }
 
 #[abi_stable::sabi_trait]
-pub trait RawEventSerializer {
+pub trait RawEventSerializer: Send {
     fn drop_stream(&mut self, _stream_id: u64) {
         unimplemented!();
     }

@@ -1,15 +1,15 @@
-use crate::{RResult, event::{Event, OpaqueEventSerializer, EventPayload}};
+use crate::{RResult, event::{Event, OpaqueEventSerializer, EventPayload}, util::MayPanic::{self, NoPanic}};
 
 use abi_stable::{std_types::{RString, RStr, RVec, RResult::ROk}, StableAbi, rvec};
 
 // Stub for now
 #[repr(C)]
-#[derive(StableAbi, Default)]
+#[derive(StableAbi, Default, Clone)]
 pub struct SinkContext(RString);
 
 // Stub for now
 #[repr(C)]
-#[derive(StableAbi, Default)]
+#[derive(StableAbi, Default, Debug)]
 pub struct SinkReply(RString);
 
 /// Result for a sink function that may provide insights or response.
@@ -32,37 +32,21 @@ pub trait RawSink: Send {
         ctx: &SinkContext,
         serializer: &mut OpaqueEventSerializer,
         start: u64,
-    ) -> ResultVec;
+    ) -> MayPanic<ResultVec>;
     /// called when receiving a signal
     fn on_signal(
         &mut self,
         _signal: Event,
         _ctx: &SinkContext,
         _serializer: &mut OpaqueEventSerializer,
-    ) -> ResultVec {
-        ROk(rvec![])
+    ) -> MayPanic<ResultVec> {
+        NoPanic(ROk(rvec![]))
     }
 
     /// Pull metrics from the sink
-    fn metrics(&mut self, _timestamp: u64) -> RVec<EventPayload> {
-        rvec![]
+    fn metrics(&mut self, _timestamp: u64) -> MayPanic<RVec<EventPayload>> {
+        NoPanic(rvec![])
     }
-
-    // lifecycle stuff
-    /// called when started
-    fn on_start(&mut self, _ctx: &mut SinkContext) {}
-    /// called when paused
-    fn on_pause(&mut self, _ctx: &mut SinkContext) {}
-    /// called when resumed
-    fn on_resume(&mut self, _ctx: &mut SinkContext) {}
-    /// called when stopped
-    fn on_stop(&mut self, _ctx: &mut SinkContext) {}
-
-    // connectivity stuff
-    /// called when sink lost connectivity
-    fn on_connection_lost(&mut self, _ctx: &mut SinkContext) {}
-    /// called when sink re-established connectivity
-    fn on_connection_established(&mut self, _ctx: &mut SinkContext) {}
 
     /// if `true` events are acknowledged/failed automatically by the sink manager.
     /// Such sinks should return SinkReply::None from on_event or SinkReply::Fail if they fail immediately.

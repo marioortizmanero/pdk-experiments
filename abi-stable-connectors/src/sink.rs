@@ -1,11 +1,12 @@
-use abi_stable::std_types::RBox;
-use std::time::Duration;
-use tokio::{task, time};
-
 use common_abi_stable_connectors::{
     sink::{RawSink_TO, SinkContext, SinkReply},
+    event::{Event, OpaqueEventSerializer},
+    value::Value,
     Result,
 };
+
+use abi_stable::std_types::RBox;
+use tokio::{io::{self, AsyncBufReadExt, BufReader}, task};
 
 // This is actually saved in the `SinkManager`, and it's used in order to
 // communicate with the pipeline (start/pause/link/etc). So in this example it's
@@ -15,16 +16,17 @@ pub struct SinkAddr(String);
 
 /// Works the same way as tremor's builder for sinks: it's simply used to spawn
 /// it into a separate task.
-#[derive(Default)]
-pub struct SinkManagerBuilder;
+pub struct SinkManagerBuilder {
+    pub serializer: OpaqueEventSerializer,
+}
 impl SinkManagerBuilder {
     pub fn spawn(
         self,
-        source: RawSink_TO<'static, RBox<()>>,
+        sink: RawSink_TO<'static, RBox<()>>,
         ctx: SinkContext,
     ) -> Result<SinkAddr> {
-        let source = Sink(source); // wrapping it up
-        let manager = SinkManager { source, ctx };
+        let sink = Sink(sink); // wrapping it up
+        let manager = SinkManager { sink, ctx, serializer: self.serializer };
         // spawn manager task
         task::spawn(manager.run());
 
@@ -32,38 +34,79 @@ impl SinkManagerBuilder {
     }
 }
 
+pub type ResultVec = Result<Vec<SinkReply>>;
+
 // Just like `Connector`, this wraps the FFI dynamic source with `abi_stable`
 // types so that it's easier to use with `std`.
 pub struct Sink(pub RawSink_TO<'static, RBox<()>>);
 impl Sink {
-    fn pull_data(&mut self, pull_id: u64, ctx: &SinkContext) -> Result<SinkReply> {
+    fn on_event(
+        &mut self,
+        input: &str,
+        event: Event,
+        ctx: &SinkContext,
+        serializer: &mut OpaqueEventSerializer,
+        start: u64,
+    ) -> ResultVec {
         self.0
-            .pull_data(pull_id, ctx)
+            .on_event(input.into(), event, ctx, serializer, start)
             .unwrap()
+            .map(Into::into) // RVec -> Vec
             .map_err(Into::into) // RBoxError -> Box<dyn Error>
             .into() // RResult -> Result
     }
 
-    fn is_transactional(&self) -> bool {
-        self.0.is_transactional()
+    fn on_signal(
+        &mut self,
+        signal: Event,
+        ctx: &SinkContext,
+        serializer: &mut OpaqueEventSerializer,
+    ) -> ResultVec {
+        self.0
+            .on_signal(signal, ctx, serializer)
+            .unwrap()
+            .map(Into::into) // RVec -> Vec
+            .map_err(Into::into) // RBoxError -> Box<dyn Error>
+            .into() // RResult -> Result
+    }
+
+    fn auto_ack(&self) -> bool {
+        self.0.auto_ack()
+    }
+
+    fn asynchronous(&self) -> bool {
+        self.0.asynchronous()
     }
 }
 
 // The runner of the source, which pulls the events continuously. This could be
 // made async so that internal operations aren't blocking thanks to the crate
 // `async_ffi`, but I'll leave it like that for now for simplicity.
-//
-// Note that it uses `dyn` instead of generics now.
 pub struct SinkManager {
-    pub source: Sink,
+    pub sink: Sink,
     pub ctx: SinkContext,
+    pub serializer: OpaqueEventSerializer,
 }
 impl SinkManager {
     pub async fn run(mut self) -> Result<()> {
-        // No communication for simplicity as well. This should actually send
-        // the messages to the `out` and `err` pipelines.
+        // No communication for simplicity as well. This should actually receive
+        // the messages from the pipelines, and also from the sink itself.
+        let stdin = io::stdin();
+        let mut stdin = BufReader::new(stdin);
+        println!("The sink reads line events from console! Try writing a line to stdin.");
+        let mut id = 0;
         loop {
-            todo!();
+            // Generating an event
+            let mut input = String::new();
+            stdin.read_line(&mut input).await;
+            let data = Value::String(input.into());
+            let event = Event { id, data };
+            id += 1;
+
+            match self.sink.on_event("/in", event, &self.ctx, &mut self.serializer, 0) {
+                Ok(reply) => eprintln!("Sink reply: {:?}", reply),
+                Err(e) => eprintln!("Error notifying new event: {}", e),
+            }
         }
     }
 }
