@@ -2,22 +2,18 @@ use crate::{RResult, event::{Event, OpaqueEventSerializer, EventPayload}, util::
 
 use abi_stable::{std_types::{RString, RStr, RVec, RResult::ROk}, StableAbi, rvec};
 
-// Stub for now
+/// Stub for now
 #[repr(C)]
 #[derive(StableAbi, Default, Clone)]
 pub struct SinkContext(RString);
 
+/// Simplified for now
 #[repr(C)]
 #[derive(StableAbi, Debug)]
 pub enum SinkReply {
-    /// no reply - maybe no reply yet, maybe replies come asynchronously...
     None,
-    /// everything went smoothly, chill
     Ack,
-    /// shit hit the fan, but only for this event, nothing big
     Fail,
-    /// the whole sink became unavailable or available again
-    /// NOTE: simplified for now
     CB,
 }
 
@@ -25,8 +21,8 @@ pub enum SinkReply {
 ///
 /// It can return None or Some(vec![]) if no insights/response were generated.
 ///
-/// An insight is a contraflowevent containing control information for the runtime like
-/// circuit breaker events, guaranteed delivery events, etc.
+/// An insight is a contraflowevent containing control information for the
+/// runtime like circuit breaker events, guaranteed delivery events, etc.
 ///
 /// A response is an event generated from the sink delivery.
 pub type ResultVec = RResult<RVec<SinkReply>>;

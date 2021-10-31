@@ -1,21 +1,24 @@
 use crate::{RResult, value::Value, DEFAULT_STREAM_ID};
 
-use abi_stable::{StableAbi, std_types::{RBox, RVec, RResult::ROk}};
+use abi_stable::{StableAbi, std_types::{RBox, RVec, RString, RResult::ROk}};
 
 #[repr(C)]
 #[derive(StableAbi)]
 pub struct Event {
-    /// The event ID
+    // The content has been simpified, as it's not really necessary for this
+    // example.
     pub id: i32,
-
-    // The rest was simpified, as it's not really necessary for this example
     pub data: Value,
 }
 
+// Stub for now
+#[repr(C)]
+#[derive(StableAbi, Default)]
+pub struct EventPayload(RString);
+
 // The event serializer is an opaque type because it's simpler than trying to
-// make it `abi_stable`-compatible.
-//
-// Anyway, for this example it's just a stub.
+// make it `abi_stable`-compatible. For this example the original type is just a
+// stub.
 pub struct EventSerializer(String);
 
 // This is just the constructor, so it doesn't need to be in the trait for the
@@ -63,10 +66,3 @@ pub trait RawEventSerializer: Send {
 
 impl RawEventSerializer for EventSerializer {}
 pub type OpaqueEventSerializer = RawEventSerializer_TO<'static, RBox<()>>;
-
-/// TODO: research usage of `Pin`
-#[repr(C)]
-#[derive(StableAbi, Default)]
-pub struct EventPayload {
-    data: i32
-}

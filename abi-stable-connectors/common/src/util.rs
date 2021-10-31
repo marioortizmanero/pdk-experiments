@@ -9,6 +9,11 @@ use abi_stable::StableAbi;
 /// returns the original type if the function finished without panicking. Since
 /// the contents returned by `catch_unwind` are just `dyn Any` and don't provide
 /// much value, they're discarded.
+///
+/// Hopefully we will be able to remove this workaround as soon as the
+/// `C-unwind`:
+///
+/// https://rust-lang.github.io/rfcs/2945-c-unwind-abi.html
 #[repr(C)]
 #[derive(Debug, StableAbi)]
 pub enum MayPanic<T> {

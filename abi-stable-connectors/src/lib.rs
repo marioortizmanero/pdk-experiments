@@ -13,21 +13,15 @@ use common_abi_stable_connectors::{
     source::SourceContext,
     ConnectorMod_Ref,
 };
-use std::time::Duration;
+use std::{process, time::Duration};
 use tokio::time;
 
-/// For benchmarking reasons, setting up the plugin and running it is a two step
-/// process. Thus, the setup is done when calling this function, and it can be
-/// ran when calling the returned closure.
-///
-/// This program acts as the `ConnectorManager`. For simplicity's sake, the
-/// `source_addr` and `sink_addr` are actually useless, so we don't have a way
-/// to communicate between the source/sink and the connector; they'll stop by
-/// themselves for the demo.
+/// This program acts as the `connector_task` function. For simplicity's sake,
+/// the `source_addr` and `sink_addr` are actually useless, so we don't have a
+/// way to communicate between the source/sink and the connector; they'll stop
+/// by themselves for the demo.
 #[tokio::main]
 pub async fn run_plugin(path: &str) -> Result<()> {
-    // This entire function will act as the `connector_task` function in the
-    // `ConnectorManager`.
     let plugin = ConnectorMod_Ref::load_from_file(path.as_ref())?;
 
     // First we obtain the pointer to the initialization function, which may
@@ -43,7 +37,8 @@ pub async fn run_plugin(path: &str) -> Result<()> {
     let mut connector = Connector(raw_connector);
     println!("Default codec: {}", connector.default_codec());
 
-    // Note that plugins don't necessarily have to export a sink or source
+    // Note that plugins don't necessarily have to export a sink or source, so
+    // it's possible that one of the following will do nothing.
     launch_source(&mut connector).await?;
     launch_sink(&mut connector).await?;
 
@@ -54,8 +49,12 @@ pub async fn run_plugin(path: &str) -> Result<()> {
             running in a separate task."
     );
     time::sleep(Duration::from_secs(15)).await;
-    println!("Stopping");
 
+    // The program is stopped forcefully (there may be sink/source tasks running
+    // in the background)
+    println!("Stopping");
+    process::exit(0);
+    #[allow(unreachable_code)]
     Ok(())
 }
 
@@ -74,7 +73,7 @@ async fn launch_source(connector: &mut Connector) -> Result<()> {
 
 async fn launch_sink(connector: &mut Connector) -> Result<()> {
     // Constructing the event serializer and turning it into an opaque type so
-    // that it can be passed through the FFI boundary.
+    // that it can easily be passed through the FFI boundary.
     //
     // In this case it doesn't make sense to downcast back to an
     // `EventSerializer` because the full functionality is already exported in

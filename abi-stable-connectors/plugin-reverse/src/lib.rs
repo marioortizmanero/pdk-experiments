@@ -28,7 +28,7 @@ use std::panic;
 
 // Note that the struct itself in the plugin doesn't need to use `abi_stable`,
 // since we're using `dyn RawConnector` as the public interface rather than
-// `Metronome`.
+// `Reverse` (it's an opaque type).
 #[derive(Clone, Debug)]
 struct Reverse;
 
@@ -101,5 +101,7 @@ fn instantiate_root_module() -> ConnectorMod_Ref {
 
 #[sabi_extern_fn]
 pub fn new() -> RawConnector_TO<'static, RBox<()>> {
+    // We don't need downcasting back to the original type, mainly because the
+    // runtime doesn't have access to it. Thus, we use `TD_Opaque` always.
     RawConnector_TO::from_value(Reverse, TD_Opaque)
 }

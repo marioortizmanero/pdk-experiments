@@ -26,7 +26,7 @@ use std::{
 
 // Note that the struct itself in the plugin doesn't need to use `abi_stable`,
 // since we're using `dyn RawConnector` as the public interface rather than
-// `Metronome`.
+// `Metronome` (it's an opaque type).
 #[derive(Clone, Debug)]
 struct Metronome {
     interval: Duration,
@@ -49,7 +49,6 @@ impl RawConnector for Metronome {
         .into()
     }
 
-    /* async */
     fn connect(
         &mut self,
         _ctx: &ConnectorContext,
@@ -58,7 +57,6 @@ impl RawConnector for Metronome {
         NoPanic(ROk(true))
     }
 
-    /* async */
     fn on_start(&mut self, _ctx: &ConnectorContext) -> MayPanic<RResult<ConnectorState>> {
         NoPanic(ROk(ConnectorState::default()))
     }
@@ -69,9 +67,9 @@ impl RawConnector for Metronome {
 }
 
 impl RawSource for Metronome {
-    /// NOTE: Unfortunately, mutable types are not panic-safe by default (they
-    /// don't implement `UnwindSafe`), which means that they can't just be used
-    /// inside a `catch_unwind` closure:
+    /// NOTE: Unfortunately, mutable types (`self` here) are not panic-safe by
+    /// default (they don't implement `UnwindSafe`), which means that they can't
+    /// just be used inside a `catch_unwind` closure:
     ///
     /// https://doc.rust-lang.org/stable/std/panic/trait.UnwindSafe.html#who-implements-unwindsafe
     ///
@@ -81,10 +79,11 @@ impl RawSource for Metronome {
     ///   `catch_unwind` call.
     /// * Use `AssertUnwindSafe` if we're sure we can guarantee that the code is
     ///   *minimally* exception-safe, i.e. it doesn't violate memory safety in
-    ///   case a panic occurs (https://doc.rust-lang.org/nomicon/exception-safety.html#exception-safety).
+    ///   case a panic occurs
+    ///   (https://doc.rust-lang.org/nomicon/exception-safety.html#exception-safety).
     ///
-    ///   Safe code can never cause undefined behaviour during unwinding, so we
-    ///   can just use `AssertUnwindSafe` in this case.
+    /// This code doesn't cause memory unsafety during unwinding, so we can just
+    /// use `AssertUnwindSafe` in this case.
     fn pull_data(&mut self, _pull_id: u64, _ctx: &SourceContext) -> MayPanic<RResult<SourceReply>> {
         panic::catch_unwind(AssertUnwindSafe(|| {
             // Even though this functionality may seem simple and panic-free,
@@ -123,7 +122,7 @@ pub fn new() -> RawConnector_TO<'static, RBox<()>> {
         interval: Duration::from_secs(1),
         next: Instant::now(),
     };
-    // We don't need to be able to downcast the connector back to the original
-    // type, so we just pass it as an opaque type.
+    // We don't need downcasting back to the original type, mainly because the
+    // runtime doesn't have access to it. Thus, we use `TD_Opaque` always.
     RawConnector_TO::from_value(metronome, TD_Opaque)
 }

@@ -12,13 +12,13 @@ use tokio::{
 };
 
 // This is actually saved in the `SinkManager`, and it's used in order to
-// communicate with the pipeline (start/pause/link/etc). So in this example it's
+// communicate with the pipeline (start/pause/link/etc). In this example it's
 // just a stub.
 #[derive(Default)]
 pub struct SinkAddr(String);
 
 /// Works the same way as tremor's builder for sinks: it's simply used to spawn
-/// it into a separate task.
+/// it into a separate task and other boilerplate.
 pub struct SinkManagerBuilder {
     pub serializer: OpaqueEventSerializer,
 }
@@ -43,7 +43,7 @@ pub type ResultVec = Result<Vec<SinkReply>>;
 // types so that it's easier to use with `std`.
 pub struct Sink(pub RawSink_TO<'static, RBox<()>>);
 impl Sink {
-    fn on_event(
+    pub fn on_event(
         &mut self,
         input: &str,
         event: Event,
@@ -59,7 +59,7 @@ impl Sink {
             .into() // RResult -> Result
     }
 
-    fn on_signal(
+    pub fn on_signal(
         &mut self,
         signal: Event,
         ctx: &SinkContext,
@@ -73,18 +73,19 @@ impl Sink {
             .into() // RResult -> Result
     }
 
-    fn auto_ack(&self) -> bool {
+    pub fn auto_ack(&self) -> bool {
         self.0.auto_ack()
     }
 
-    fn asynchronous(&self) -> bool {
+    pub fn asynchronous(&self) -> bool {
         self.0.asynchronous()
     }
 }
 
-// The runner of the source, which pulls the events continuously. This could be
-// made async so that internal operations aren't blocking thanks to the crate
-// `async_ffi`, but I'll leave it like that for now for simplicity.
+// The runner of the sink, which receives events from the pipeline (stdin in
+// this case) and forwards them to the sinks. `on_event` could be made async so
+// that internal operations aren't blocking thanks to the crate `async_ffi`, but
+// I'll leave it like that for now for simplicity.
 pub struct SinkManager {
     pub sink: Sink,
     pub ctx: SinkContext,

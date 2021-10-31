@@ -14,18 +14,18 @@ use common_abi_stable_connectors::{
 };
 
 // The higher level connector interface, which wraps the raw connector from the
-// plugin. This is only needed in the runtime itself because the common library
+// plugin. This is only used in the runtime itself because the common library
 // only needs the basic components that are shared.
 //
 // This may introduce a very small overhead in some cases, so maybe it's worth
-// not converting types from `abi_stable` into `std` (it's not really so bad).
-// For functions like `create_source` and similars it's not worth it because
-// they're only ran once.
+// not converting types from `abi_stable` into `std`; it's not really so bad
+// using them after all. Though for functions like `create_source` and similars
+// it's not worth complicating ourselves because they're only ran once.
 //
 // Note that the implementaion currently ignores the `MayPanic` types by
-// unwrapping them, but this should be handled gracefully to avoid aborting the
-// runtime. This is safe because the panic will occur here in the runtime rather
-// than in the plugin.
+// unwrapping them, but this could be handled gracefully to avoid aborting the
+// runtime. This is safe because thanks to `MayPanic`, the panic will occur here
+// in the runtime rather than in the plugin.
 pub struct Connector(pub RawConnector_TO<'static, RBox<()>>);
 impl Connector {
     pub async fn create_source(
