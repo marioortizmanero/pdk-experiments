@@ -1,12 +1,15 @@
 use common_abi_stable_connectors::{
-    sink::{RawSink_TO, SinkContext, SinkReply},
     event::{Event, OpaqueEventSerializer},
+    sink::{RawSink_TO, SinkContext, SinkReply},
     value::Value,
     Result,
 };
 
 use abi_stable::std_types::RBox;
-use tokio::{io::{self, AsyncBufReadExt, BufReader}, task};
+use tokio::{
+    io::{self, AsyncBufReadExt, BufReader},
+    task,
+};
 
 // This is actually saved in the `SinkManager`, and it's used in order to
 // communicate with the pipeline (start/pause/link/etc). So in this example it's
@@ -20,13 +23,13 @@ pub struct SinkManagerBuilder {
     pub serializer: OpaqueEventSerializer,
 }
 impl SinkManagerBuilder {
-    pub fn spawn(
-        self,
-        sink: RawSink_TO<'static, RBox<()>>,
-        ctx: SinkContext,
-    ) -> Result<SinkAddr> {
+    pub fn spawn(self, sink: RawSink_TO<'static, RBox<()>>, ctx: SinkContext) -> Result<SinkAddr> {
         let sink = Sink(sink); // wrapping it up
-        let manager = SinkManager { sink, ctx, serializer: self.serializer };
+        let manager = SinkManager {
+            sink,
+            ctx,
+            serializer: self.serializer,
+        };
         // spawn manager task
         task::spawn(manager.run());
 
@@ -98,12 +101,15 @@ impl SinkManager {
         loop {
             // Generating an event
             let mut input = String::new();
-            stdin.read_line(&mut input).await;
+            stdin.read_line(&mut input).await?;
             let data = Value::String(input.into());
             let event = Event { id, data };
             id += 1;
 
-            match self.sink.on_event("/in", event, &self.ctx, &mut self.serializer, 0) {
+            match self
+                .sink
+                .on_event("/in", event, &self.ctx, &mut self.serializer, 0)
+            {
                 Ok(reply) => eprintln!("Sink reply: {:?}", reply),
                 Err(e) => eprintln!("Error notifying new event: {}", e),
             }

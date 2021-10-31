@@ -1,6 +1,6 @@
-use crate::{Result, RResult, value::Value, DEFAULT_STREAM_ID};
+use crate::{RResult, value::Value, DEFAULT_STREAM_ID};
 
-use abi_stable::{StableAbi, std_types::{RBox, RVec, RString, RResult::ROk}};
+use abi_stable::{StableAbi, std_types::{RBox, RVec, RResult::ROk}};
 
 #[repr(C)]
 #[derive(StableAbi)]

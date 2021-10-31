@@ -4,10 +4,15 @@ mod connectors;
 mod sink;
 mod source;
 
-use crate::{connectors::Connector, source::SourceManagerBuilder, sink::SinkManagerBuilder};
+use crate::{connectors::Connector, sink::SinkManagerBuilder, source::SourceManagerBuilder};
 use abi_stable::{erased_types::TD_Opaque, library::RootModule};
 use anyhow::{anyhow, Result};
-use common_abi_stable_connectors::{ConnectorMod_Ref, event::{EventSerializer, RawEventSerializer_TO}, sink::SinkContext, source::SourceContext};
+use common_abi_stable_connectors::{
+    event::{EventSerializer, RawEventSerializer_TO},
+    sink::SinkContext,
+    source::SourceContext,
+    ConnectorMod_Ref,
+};
 use std::time::Duration;
 use tokio::time;
 
