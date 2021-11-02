@@ -8,13 +8,13 @@ use common_abi_stable_connectors::{
 };
 
 // This is actually saved in the `SourceManager`, and it's used in order to
-// communicate with the pipeline (start/pause/link/etc). So in this example it's
+// communicate with the pipeline (start/pause/link/etc). In this example it's
 // just a stub.
 #[derive(Default)]
 pub struct SourceAddr(String);
 
 /// Works the same way as tremor's builder for sources: it's simply used to
-/// spawn it into a separate task.
+/// spawn it into a separate task and other boilerplate.
 #[derive(Default)]
 pub struct SourceManagerBuilder;
 impl SourceManagerBuilder {
@@ -36,7 +36,8 @@ impl SourceManagerBuilder {
 // types so that it's easier to use with `std`.
 pub struct Source(pub RawSource_TO<'static, RBox<()>>);
 impl Source {
-    fn pull_data(&mut self, pull_id: u64, ctx: &SourceContext) -> Result<SourceReply> {
+    #[inline]
+    pub fn pull_data(&mut self, pull_id: u64, ctx: &SourceContext) -> Result<SourceReply> {
         self.0
             .pull_data(pull_id, ctx)
             .unwrap()
@@ -44,16 +45,15 @@ impl Source {
             .into() // RResult -> Result
     }
 
-    fn is_transactional(&self) -> bool {
+    #[inline]
+    pub fn is_transactional(&self) -> bool {
         self.0.is_transactional()
     }
 }
 
-// The runner of the source, which pulls the events continuously. This could be
-// made async so that internal operations aren't blocking thanks to the crate
-// `async_ffi`, but I'll leave it like that for now for simplicity.
-//
-// Note that it uses `dyn` instead of generics now.
+// The runner of the source, which pulls the events continuously. `pull_data`
+// could be made async so that internal operations aren't blocking thanks to the
+// crate `async_ffi`, but I'll leave it like that for now for simplicity.
 pub struct SourceManager {
     pub source: Source,
     pub ctx: SourceContext,

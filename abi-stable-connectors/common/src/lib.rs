@@ -5,7 +5,8 @@ pub mod reconnect;
 pub mod sink;
 pub mod source;
 pub mod util;
-mod wrappers;
+pub mod event;
+pub mod value;
 
 use crate::connectors::RawConnector_TO;
 
@@ -22,6 +23,9 @@ use abi_stable::{
 // `abi_stable` context.
 pub type RResult<T> = abi_stable::std_types::RResult<T, RBoxError>;
 pub type Result<T> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
+
+// Constants
+pub const DEFAULT_STREAM_ID: u64 = 0;
 
 #[repr(C)]
 #[derive(StableAbi)]

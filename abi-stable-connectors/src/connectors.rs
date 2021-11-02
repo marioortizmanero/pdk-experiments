@@ -14,20 +14,21 @@ use common_abi_stable_connectors::{
 };
 
 // The higher level connector interface, which wraps the raw connector from the
-// plugin. This is only needed in the runtime itself because the common library
+// plugin. This is only used in the runtime itself because the common library
 // only needs the basic components that are shared.
 //
 // This may introduce a very small overhead in some cases, so maybe it's worth
-// not converting types from `abi_stable` into `std` (it's not really so bad).
-// For functions like `create_source` and similars it's not worth it because
-// they're only ran once.
+// not converting types from `abi_stable` into `std`; it's not really so bad
+// using them after all. Though for functions like `create_source` and similars
+// it's not worth complicating ourselves because they're only ran once.
 //
 // Note that the implementaion currently ignores the `MayPanic` types by
-// unwrapping them, but this should be handled gracefully to avoid aborting the
-// runtime. This is safe because the panic will occur here in the runtime rather
-// than in the plugin.
+// unwrapping them, but this could be handled gracefully to avoid aborting the
+// runtime. This is safe because thanks to `MayPanic`, the panic will occur here
+// in the runtime rather than in the plugin.
 pub struct Connector(pub RawConnector_TO<'static, RBox<()>>);
 impl Connector {
+    #[inline]
     pub async fn create_source(
         &mut self,
         source_context: SourceContext,
@@ -40,15 +41,20 @@ impl Connector {
         }
     }
 
+    #[inline]
     pub async fn create_sink(
         &mut self,
-        _sink_context: SinkContext,
-        _builder: sink::SinkManagerBuilder,
+        sink_context: SinkContext,
+        builder: sink::SinkManagerBuilder,
     ) -> Result<Option<sink::SinkAddr>> {
-        // TODO: the structure should be almost the same as `create_source`
-        unimplemented!("only sources are implemented for now")
+        match self.0.create_sink(sink_context.clone()).unwrap() {
+            ROk(RSome(raw_sink)) => builder.spawn(raw_sink, sink_context).map(Some),
+            ROk(RNone) => Ok(None),
+            RErr(err) => Err(err.into()),
+        }
     }
 
+    #[inline]
     pub async fn connect(
         &mut self,
         ctx: &ConnectorContext,
@@ -61,6 +67,7 @@ impl Connector {
             .into() // RResult -> Result
     }
 
+    #[inline]
     pub async fn on_start(&mut self, ctx: &ConnectorContext) -> Result<ConnectorState> {
         self.0
             .on_start(ctx)
@@ -69,18 +76,22 @@ impl Connector {
             .into() // RResult -> Result
     }
 
+    #[inline]
     pub async fn on_pause(&mut self, ctx: &ConnectorContext) {
         self.0.on_pause(ctx).unwrap()
     }
 
+    #[inline]
     pub async fn on_resume(&mut self, ctx: &ConnectorContext) {
         self.0.on_resume(ctx).unwrap()
     }
 
+    #[inline]
     pub async fn on_stop(&mut self, ctx: &ConnectorContext) {
         self.0.on_stop(ctx).unwrap()
     }
 
+    #[inline]
     pub fn default_codec(&self) -> &str {
         self.0.default_codec().into()
     }

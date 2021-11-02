@@ -20,7 +20,7 @@ use std::panic;
 
 // Note that the struct itself in the plugin doesn't need to use `abi_stable`,
 // since we're using `dyn RawConnector` as the public interface rather than
-// `Metronome`.
+// `Panic` (it's an opaque type).
 #[derive(Clone, Debug)]
 struct Panic;
 
@@ -33,7 +33,6 @@ impl RawConnector for Panic {
             .into()
     }
 
-    /* async */
     fn connect(
         &mut self,
         _ctx: &ConnectorContext,
@@ -42,7 +41,6 @@ impl RawConnector for Panic {
         NoPanic(ROk(true))
     }
 
-    /* async */
     fn on_start(&mut self, _ctx: &ConnectorContext) -> MayPanic<RResult<ConnectorState>> {
         NoPanic(ROk(ConnectorState::default()))
     }
@@ -57,10 +55,6 @@ impl RawSource for Panic {
         panic::catch_unwind(|| panic!("Oh no! Who would've known the `plugin-panic` panicked!"))
             .into()
     }
-
-    fn is_transactional(&self) -> bool {
-        false
-    }
 }
 
 /// Exports the root module of this library.
@@ -73,5 +67,7 @@ fn instantiate_root_module() -> ConnectorMod_Ref {
 
 #[sabi_extern_fn]
 pub fn new() -> RawConnector_TO<'static, RBox<()>> {
+    // We don't need downcasting back to the original type, mainly because the
+    // runtime doesn't have access to it. Thus, we use `TD_Opaque` always.
     RawConnector_TO::from_value(Panic, TD_Opaque)
 }

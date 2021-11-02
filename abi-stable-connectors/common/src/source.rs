@@ -2,11 +2,12 @@ use abi_stable::{std_types::RString, StableAbi};
 
 use crate::{RResult, util::MayPanic};
 
-// Stubs for the original trait. We can't use `()` because it's not FFI-safe.
+/// Stub for now
 #[repr(C)]
 #[derive(StableAbi, Default, Clone)]
 pub struct SourceContext(RString);
 
+/// Simplified for now
 #[repr(C)]
 #[derive(StableAbi)]
 pub enum SourceReply {
@@ -14,8 +15,6 @@ pub enum SourceReply {
     Data(RString), // should be a vector of u8 or similars
 }
 
-// The source needs a trait object because it's now returned in the FFI
-// interface.
 #[abi_stable::sabi_trait]
 pub trait RawSource: Send {
     /// Pulls an event from the source if one exists
