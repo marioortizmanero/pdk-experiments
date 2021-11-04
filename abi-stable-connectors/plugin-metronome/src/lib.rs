@@ -12,9 +12,12 @@ use abi_stable::{
 };
 
 use common_abi_stable_connectors::{
-    connectors::{ConnectorContext, ConnectorState, RawConnector, RawConnector_TO, Attempt},
+    connectors::{
+        Attempt, ConnectorContext, ConnectorState, RawConnector, RawConnector_TO, TremorUrl,
+    },
     source::{RawSource, RawSource_TO, SourceContext, SourceReply},
     util::MayPanic::{self, NoPanic},
+    value::Value,
     ConnectorMod, ConnectorMod_Ref, RResult,
 };
 
@@ -48,11 +51,7 @@ impl RawConnector for Metronome {
         .into()
     }
 
-    fn connect(
-        &mut self,
-        _ctx: &ConnectorContext,
-        _notifier: &Attempt,
-    ) -> MayPanic<RResult<bool>> {
+    fn connect(&mut self, _ctx: &ConnectorContext, _notifier: &Attempt) -> MayPanic<RResult<bool>> {
         NoPanic(ROk(true))
     }
 
@@ -116,7 +115,7 @@ fn instantiate_root_module() -> ConnectorMod_Ref {
 }
 
 #[sabi_extern_fn]
-pub fn new() -> RawConnector_TO<'static, RBox<()>> {
+pub fn new(_url: &TremorUrl, _config: ROption<Value>) -> RawConnector_TO<'static, RBox<()>> {
     let metronome = Metronome {
         interval: Duration::from_secs(1),
         next: Instant::now(),

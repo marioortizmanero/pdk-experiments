@@ -31,6 +31,11 @@ pub struct Attempt(RString);
 // Stub
 #[repr(C)]
 #[derive(StableAbi, Default)]
+pub struct TremorUrl(RString);
+
+// Stub
+#[repr(C)]
+#[derive(StableAbi, Default)]
 pub struct ConnectorState(RString);
 
 // The low level connector trait used for the plugins, with types from

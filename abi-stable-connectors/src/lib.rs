@@ -5,15 +5,18 @@ mod sink;
 mod source;
 
 use crate::{connectors::Connector, sink::SinkManagerBuilder, source::SourceManagerBuilder};
-use abi_stable::{erased_types::TD_Opaque, library::RootModule};
+
+use std::{process, time::Duration};
+
+use abi_stable::{erased_types::TD_Opaque, library::RootModule, std_types::ROption::RNone};
 use anyhow::{anyhow, Result};
 use common_abi_stable_connectors::{
+    connectors::TremorUrl,
     event::{EventSerializer, RawEventSerializer_TO},
     sink::SinkContext,
     source::SourceContext,
     ConnectorMod_Ref,
 };
-use std::{process, time::Duration};
 use tokio::time;
 
 /// This program acts as the `connector_task` function. For simplicity's sake,
@@ -33,7 +36,8 @@ pub async fn run_plugin(path: &str) -> Result<()> {
     // We initialize the plugin, obtaining a raw dynamic connector type. In
     // order to use it easily from now on, we wrap it under a `Connector`
     // concrete type.
-    let raw_connector = new_fn();
+    let url = TremorUrl::default();
+    let raw_connector = new_fn(&url, RNone);
     let mut connector = Connector(raw_connector);
     println!("Default codec: {}", connector.default_codec());
 
