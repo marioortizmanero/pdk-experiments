@@ -16,9 +16,8 @@ use abi_stable::{
 
 use common_abi_stable_connectors::{
     value::Value,
-    connectors::{ConnectorContext, ConnectorState, RawConnector, RawConnector_TO},
+    connectors::{ConnectorContext, ConnectorState, RawConnector, RawConnector_TO, Attempt},
     event::{Event, OpaqueEventSerializer},
-    reconnect,
     sink::{RawSink, RawSink_TO, ResultVec, SinkContext, SinkReply},
     util::MayPanic::{self, NoPanic},
     ConnectorMod, ConnectorMod_Ref, RResult,
@@ -51,7 +50,7 @@ impl RawConnector for Reverse {
     fn connect(
         &mut self,
         _ctx: &ConnectorContext,
-        _notifier: reconnect::ConnectionLostNotifier,
+        _attempt: &Attempt,
     ) -> MayPanic<RResult<bool>> {
         NoPanic(ROk(true))
     }

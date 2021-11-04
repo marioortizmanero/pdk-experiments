@@ -12,8 +12,7 @@ use abi_stable::{
 };
 
 use common_abi_stable_connectors::{
-    connectors::{ConnectorContext, ConnectorState, RawConnector, RawConnector_TO},
-    reconnect,
+    connectors::{ConnectorContext, ConnectorState, RawConnector, RawConnector_TO, Attempt},
     source::{RawSource, RawSource_TO, SourceContext, SourceReply},
     util::MayPanic::{self, NoPanic},
     ConnectorMod, ConnectorMod_Ref, RResult,
@@ -52,7 +51,7 @@ impl RawConnector for Metronome {
     fn connect(
         &mut self,
         _ctx: &ConnectorContext,
-        _notifier: reconnect::ConnectionLostNotifier,
+        _notifier: &Attempt,
     ) -> MayPanic<RResult<bool>> {
         NoPanic(ROk(true))
     }

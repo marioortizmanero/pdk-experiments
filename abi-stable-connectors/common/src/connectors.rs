@@ -16,10 +16,17 @@ use crate::{
     util::MayPanic::{self, NoPanic}
 };
 
+// Simplified
+#[repr(C)]
+#[derive(StableAbi)]
+pub struct ConnectorContext {
+    pub notifier: reconnect::ConnectionLostNotifier
+}
+
 // Stub
 #[repr(C)]
 #[derive(StableAbi, Default)]
-pub struct ConnectorContext(RString);
+pub struct Attempt(RString);
 
 // Stub
 #[repr(C)]
@@ -56,7 +63,7 @@ pub trait RawConnector: Send {
     fn connect(
         &mut self,
         ctx: &ConnectorContext,
-        notifier: reconnect::ConnectionLostNotifier,
+        attempt: &Attempt,
     ) -> MayPanic<RResult<bool>>;
 
     fn on_start(&mut self, ctx: &ConnectorContext) -> MayPanic<RResult<ConnectorState>>;

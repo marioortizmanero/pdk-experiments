@@ -47,3 +47,28 @@ impl<T> From<std::thread::Result<T>> for MayPanic<T> {
         }
     }
 }
+
+/// Some parts of Tremor include channels, for example to notify that the
+/// connection has been lost. This happens asynchronously, i.e. not necessarily
+/// when a connector's method is being called.
+///
+/// This type wraps the callback into a higher level type for ease of use. It
+/// uses a function pointer instead of generics because it's meant to be used
+/// through FFI, where generics don't make much sense.
+#[repr(C)]
+#[derive(StableAbi)]
+pub struct Sender<T> {
+    callback: extern "C" fn(T),
+}
+
+impl<T> Sender<T> {
+    pub fn new(callback: extern "C" fn(T)) -> Self {
+        Self {
+            callback
+        }
+    }
+
+    pub fn send(&self, t: T) {
+        (self.callback)(t);
+    }
+}
