@@ -9,19 +9,16 @@ use abi_stable::{
 };
 
 use crate::{
-    reconnect,
     sink::{RawSink_TO, SinkContext},
     source::{RawSource_TO, SourceContext},
     RResult,
     util::MayPanic::{self, NoPanic}
 };
 
-// Simplified
+// Stub
 #[repr(C)]
 #[derive(StableAbi)]
-pub struct ConnectorContext {
-    pub notifier: reconnect::ConnectionLostNotifier
-}
+pub struct ConnectorContext(RString);
 
 // Stub
 #[repr(C)]

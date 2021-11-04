@@ -56,7 +56,7 @@ impl<T> From<std::thread::Result<T>> for MayPanic<T> {
 /// uses a function pointer instead of generics because it's meant to be used
 /// through FFI, where generics don't make much sense.
 #[repr(C)]
-#[derive(StableAbi)]
+#[derive(Clone, StableAbi)]
 pub struct Sender<T> {
     callback: extern "C" fn(T),
 }

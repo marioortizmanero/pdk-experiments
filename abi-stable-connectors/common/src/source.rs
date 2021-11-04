@@ -2,7 +2,9 @@ use abi_stable::{std_types::RString, StableAbi};
 
 use crate::{RResult, util::MayPanic};
 
-/// Stub for now
+/// This is actually a relatively simple struct in the original Tremor codebase,
+/// but since I wanted to figure out how to use callbacks I decided to put a
+/// `ConnectionLostNotifier` in here. It should be in `ConnectorContext` instead
 #[repr(C)]
 #[derive(StableAbi, Default, Clone)]
 pub struct SourceContext(RString);

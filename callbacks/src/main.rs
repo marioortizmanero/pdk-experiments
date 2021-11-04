@@ -1,4 +1,5 @@
 mod wrapper {
+    #[derive(Clone)]
     pub struct Sender<T> {
         callback: fn(T),
     }
@@ -17,7 +18,7 @@ mod wrapper {
 }
 
 mod raw {
-    // This is common
+    // This is in common
     pub struct ConnectorContext {
         callback: fn(i32),
     }
@@ -39,7 +40,7 @@ mod raw {
 mod nicer {
     use super::wrapper::Sender;
 
-    // This is common
+    // This is in common
     pub struct ConnectorContext {
         sender: Sender<i32>
     }
@@ -58,9 +59,46 @@ mod nicer {
     }
 }
 
+mod nicer_concurrent {
+    use super::wrapper::Sender;
+    use std::{thread, time::Duration};
+
+    // This is in common
+    #[derive(Clone)]
+    pub struct ConnectorContext {
+        sender: Sender<i32>
+    }
+
+    // This is the plugin
+    pub fn plugin_fn(ctx: &ConnectorContext) {
+        // The callback will be invoked a few times at about the same time
+        for i in 0..5 {
+            let ctx = ctx.clone();
+            thread::spawn(move || {
+                thread::sleep(Duration::from_millis(100));
+                ctx.sender.send(i);
+            });
+        }
+    }
+
+    pub fn run() {
+        // NOTE: This will work as long as the function in the `Sender` can be
+        // coerced into a regular function (i.e. it doesn't capture anything).
+        let ctx = ConnectorContext {
+            sender: Sender::new(|x| {
+                println!("callback invoked v3! {}", x)
+            })
+        };
+        // Waiting for the callbacks to occur
+        plugin_fn(&ctx);
+        thread::sleep(Duration::from_millis(500));
+    }
+}
+
 // TODO: will they work OK in a multi-threaded environment? Perhaps it needs a
 // mutex? Something?
 fn main() {
     raw::run();
     nicer::run();
+    nicer_concurrent::run();
 }
