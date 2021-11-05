@@ -5,12 +5,13 @@ pub trait State: Debug {
     fn counter(&self) -> i32;
 }
 
-// A trait object for `State`
+// A trait object for the `State` Trait Object
 pub type StateBox = State_TO<'static, RBox<()>>;
 
 // It can then be used easily like this
 pub fn usage(state: &mut StateBox) {
     println!("state debug: {:?}", state);
+    println!("state counter: {:?}", state.counter());
 }
 
 mod sample_impl {

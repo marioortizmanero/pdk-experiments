@@ -24,7 +24,8 @@ pub struct MinMod {
     pub new: extern "C" fn() -> State,
 
     /// Calculates the minimum between two integers. This is the last defined
-    /// field for the current version.
+    /// field for the current version. If we try to load fields after this, all
+    /// of them will be an `Option`.
     #[sabi(last_prefix_field)]
     pub min: extern "C" fn(&mut State, i32, i32) -> i32,
 }

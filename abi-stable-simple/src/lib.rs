@@ -6,8 +6,8 @@ pub fn run_plugin(path: &str) -> Result<()> {
     let plugin = MinMod_Ref::load_from_directory(path.as_ref())?;
     println!("Loading plugin {}", MinMod_Ref::NAME);
 
-    // First we obtain the function pointer. This is not an `Option` because the
-    // prefix type has `min` as the last field.
+    // First we obtain the function pointer. This is not an `Option` because
+    // `new` is defined before `min`, the last prefix field.
     let new_fn = plugin.new();
 
     // We initialize the plugin, obtaining a state.
