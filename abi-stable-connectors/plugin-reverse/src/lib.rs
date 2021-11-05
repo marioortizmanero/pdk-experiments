@@ -1,10 +1,9 @@
 //! Simple plugin to test panic safety.
 
 use abi_stable::{
-    rvec,
     export_root_module,
     prefix_type::PrefixTypeTrait,
-    rstr, sabi_extern_fn,
+    rstr, rvec, sabi_extern_fn,
     std_types::{
         RBox,
         ROption::{self, RSome},
@@ -15,12 +14,13 @@ use abi_stable::{
 };
 
 use common_abi_stable_connectors::{
-    value::Value,
-    connectors::{ConnectorContext, ConnectorState, RawConnector, RawConnector_TO},
+    connectors::{
+        Attempt, ConnectorContext, ConnectorState, RawConnector, RawConnector_TO, TremorUrl,
+    },
     event::{Event, OpaqueEventSerializer},
-    reconnect,
     sink::{RawSink, RawSink_TO, ResultVec, SinkContext, SinkReply},
     util::MayPanic::{self, NoPanic},
+    value::Value,
     ConnectorMod, ConnectorMod_Ref, RResult,
 };
 
@@ -48,11 +48,7 @@ impl RawConnector for Reverse {
         .into()
     }
 
-    fn connect(
-        &mut self,
-        _ctx: &ConnectorContext,
-        _notifier: reconnect::ConnectionLostNotifier,
-    ) -> MayPanic<RResult<bool>> {
+    fn connect(&mut self, _ctx: &ConnectorContext, _attempt: &Attempt) -> MayPanic<RResult<bool>> {
         NoPanic(ROk(true))
     }
 
@@ -83,10 +79,8 @@ impl RawSink for Reverse {
                 println!("Reverse: {}", reverse);
 
                 NoPanic(ROk(rvec![SinkReply::Ack]))
-            },
-            Value::Integer(_) => {
-                NoPanic(ROk(rvec![SinkReply::Fail]))
             }
+            Value::Integer(_) => NoPanic(ROk(rvec![SinkReply::Fail])),
         }
     }
 }
@@ -100,7 +94,7 @@ fn instantiate_root_module() -> ConnectorMod_Ref {
 }
 
 #[sabi_extern_fn]
-pub fn new() -> RawConnector_TO<'static, RBox<()>> {
+pub fn new(_url: &TremorUrl, _config: ROption<Value>) -> RawConnector_TO<'static, RBox<()>> {
     // We don't need downcasting back to the original type, mainly because the
     // runtime doesn't have access to it. Thus, we use `TD_Opaque` always.
     RawConnector_TO::from_value(Reverse, TD_Opaque)

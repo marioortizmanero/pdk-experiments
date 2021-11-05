@@ -8,14 +8,14 @@ pub mod util;
 pub mod event;
 pub mod value;
 
-use crate::connectors::RawConnector_TO;
+use crate::{connectors::{RawConnector_TO, TremorUrl}, value::Value};
 
 use abi_stable::{
     declare_root_module_statics,
     library::RootModule,
     package_version_strings,
     sabi_types::VersionStrings,
-    std_types::{RBox, RBoxError},
+    std_types::{RBox, RBoxError, ROption},
     StableAbi,
 };
 
@@ -27,11 +27,12 @@ pub type Result<T> = std::result::Result<T, Box<dyn std::error::Error + Send + S
 // Constants
 pub const DEFAULT_STREAM_ID: u64 = 0;
 
+/// The `new` function is basically the `ConnectorBuilder::from_config` method.
 #[repr(C)]
 #[derive(StableAbi)]
 #[sabi(kind(Prefix))]
 pub struct ConnectorMod {
-    pub new: extern "C" fn() -> RawConnector_TO<'static, RBox<()>>,
+    pub new: extern "C" fn(id: &TremorUrl, config: ROption<Value>) -> RawConnector_TO<'static, RBox<()>>,
 }
 
 // Marking `MinMod` as the main module in this plugin. Note that `MinMod_Ref` is

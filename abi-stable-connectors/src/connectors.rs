@@ -6,8 +6,7 @@ use abi_stable::std_types::{
     RResult::{RErr, ROk},
 };
 use common_abi_stable_connectors::{
-    connectors::{ConnectorContext, ConnectorState, RawConnector_TO},
-    reconnect,
+    connectors::{Attempt, ConnectorContext, ConnectorState, RawConnector_TO},
     sink::SinkContext,
     source::SourceContext,
     Result,
@@ -55,13 +54,9 @@ impl Connector {
     }
 
     #[inline]
-    pub async fn connect(
-        &mut self,
-        ctx: &ConnectorContext,
-        notifier: reconnect::ConnectionLostNotifier,
-    ) -> Result<bool> {
+    pub async fn connect(&mut self, ctx: &ConnectorContext, attempt: &Attempt) -> Result<bool> {
         self.0
-            .connect(ctx, notifier)
+            .connect(ctx, attempt)
             .unwrap()
             .map_err(Into::into) // RBoxError -> Box<dyn Error>
             .into() // RResult -> Result
