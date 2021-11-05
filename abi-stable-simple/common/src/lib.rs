@@ -23,7 +23,9 @@ pub struct MinMod {
     /// module.
     pub new: extern "C" fn() -> State,
 
-    /// Calculates the minimum between two integers
+    /// Calculates the minimum between two integers. This is the last defined
+    /// field for the current version.
+    #[sabi(last_prefix_field)]
     pub min: extern "C" fn(&mut State, i32, i32) -> i32,
 }
 

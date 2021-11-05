@@ -9,7 +9,8 @@ use common_sabi_simple::{MinMod, MinMod_Ref, State};
 fn instantiate_root_module() -> MinMod_Ref {
     MinMod {
         new,
-        min
+        min,
+        max,
     }
     .leak_into_prefix() // Converts the `MinMod` into `MinMod_Ref` and leaks it
 }
@@ -25,4 +26,9 @@ pub fn new() -> State {
 pub fn min(state: &mut State, a: i32, b: i32) -> i32 {
     state.counter += 1;
     a.min(b)
+}
+
+#[sabi_extern_fn]
+pub fn max() {
+
 }

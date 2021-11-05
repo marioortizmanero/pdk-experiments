@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2018"
 
 [dependencies]
-abi_stable = "0.10"
+abi_stable = { version = "0.10", default-features = false }
 async-trait = "0.1"
 cglue = "0.1"
 serde_yaml = "0.8"
