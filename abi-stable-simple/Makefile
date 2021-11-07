@@ -4,17 +4,34 @@
 
 debug-sample:
 	cd plugin-sample && cargo build
-	cargo run -- plugin-sample/target/debug/libplugin_sample.so
+	cargo run -- plugin-sample/target/debug/
 release-sample:
 	cd plugin-sample && cargo build --release
-	cargo run --release -- plugin-sample/target/release/libplugin_sample.so
+	cargo run --release -- plugin-sample/target/release/
 
 debug-panic:
 	cd plugin-panic && cargo build
-	cargo run -- plugin-panic/target/debug/libplugin_panic.so
+	cargo run -- plugin-panic/target/debug/
 release-panic:
 	cd plugin-panic && cargo build --release
-	cargo run --release -- plugin-panic/target/release/libplugin_panic.so
+	cargo run --release -- plugin-panic/target/release/
+
+debug-versionmismatch:
+	cd plugin-versionmismatch && cargo build
+	cargo run -- plugin-versionmismatch/target/debug/
+release-versionmismatch:
+	cd plugin-versionmismatch && cargo build --release
+	cargo run --release -- plugin-versionmismatch/target/release/
+
+debug-wrongtype:
+	cd plugin-wrongtype && cargo build
+	cargo run -- plugin-wrongtype/target/debug/
+release-wrongtype:
+	cd plugin-wrongtype && cargo build --release
+	cargo run --release -- plugin-wrongtype/target/release/
+
+debug: debug-sample
+release: release-sample
 
 clean:
 	rm -rf target plugin-sample/target

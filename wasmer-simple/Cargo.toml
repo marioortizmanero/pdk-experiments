@@ -6,3 +6,5 @@ edition = "2018"
 [dependencies]
 common-wasmer = { path = "common", version = "0.1.0" }
 wasmer = "2.0.0"
+log = "0.4"
+simple_logger = "1.13"

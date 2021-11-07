@@ -9,12 +9,11 @@ use common_sabi_simple::{MinMod, MinMod_Ref, State};
 fn instantiate_root_module() -> MinMod_Ref {
     MinMod {
         new,
-        min
+        min,
     }
     .leak_into_prefix() // Converts the `MinMod` into `MinMod_Ref` and leaks it
 }
 
-// TODO: research "erasing"
 #[sabi_extern_fn]
 pub fn new() -> State {
     State {

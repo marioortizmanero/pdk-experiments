@@ -1,9 +1,9 @@
 [package]
-name = "sabi_simple"
+name = "abi-stable-simple"
 version = "0.1.0"
 edition = "2018"
 
 [dependencies]
 anyhow = "1.0"
-common-sabi-simple = { version = "0.1.0", path = "common" }
-abi_stable = "0.9"
+common-sabi-simple = { version = "0.2.0", path = "common" }
+abi_stable = { version = "0.10", default-features = false }

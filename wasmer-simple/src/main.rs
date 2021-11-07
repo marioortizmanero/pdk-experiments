@@ -16,6 +16,7 @@ fn main() {
         }
     };
 
+    simple_logger::SimpleLogger::new().init().unwrap();
     if let Err(e) = run_plugin(&path) {
         eprintln!("Error when running the plugin: {}", e);
         process::exit(1);

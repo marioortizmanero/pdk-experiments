@@ -1,0 +1,16 @@
+[package]
+name = "plugin-metronome"
+version = "0.1.0"
+edition = "2018"
+
+# This is required so that the library is compiled as a shared library. See:
+#
+# * https://doc.rust-lang.org/cargo/reference/cargo-targets.html#the-crate-type-field
+# * https://doc.rust-lang.org/reference/linkage.html
+[lib]
+name = "metronome"
+crate-type = ["cdylib"]
+
+[dependencies]
+abi_stable = { version = "0.10", default-features = false }
+common-abi-stable-connectors = { version = "0.1.0", path = "../common" }
