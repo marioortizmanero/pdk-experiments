@@ -34,6 +34,6 @@ pub fn new() -> StateBox {
 
 #[sabi_extern_fn]
 pub fn min(state: &mut StateBox, a: i32, b: i32) -> i32 {
-    state.counter += 1;
+    state.incr_counter();
     a.min(b)
 }
