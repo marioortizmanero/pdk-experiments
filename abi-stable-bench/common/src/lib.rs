@@ -1,13 +1,13 @@
-use abi_stable::{StableAbi, declare_root_module_statics, library::RootModule, package_version_strings, sabi_types::VersionStrings};
+use abi_stable::{StableAbi, declare_root_module_statics, library::RootModule, package_version_strings, sabi_types::VersionStrings, std_types::RBox};
 
-/// This is the struct that's passed to the functions in the module, which
-/// serves as a persistent state in a safer way than with a global.
-#[repr(C)]
-#[derive(StableAbi, Debug)]
-pub struct State {
-    // Keeps a counter of operations done
-    pub counter: i32
+/// This is the generic struct that's passed to the functions in the module,
+/// which serves as a persistent state in a safer way than with a global.
+#[abi_stable::sabi_trait]
+pub trait State: Debug {
+    fn counter(&self) -> i32;
+    fn incr_counter(&mut self);
 }
+pub type StateBox = State_TO<'static, RBox<()>>;
 
 // Using the stable C ABI
 #[repr(C)]
@@ -21,10 +21,10 @@ pub struct State {
 pub struct MinMod {
     /// Initializes the state, which will be passed to the functions in this
     /// module.
-    pub new: extern "C" fn() -> State,
+    pub new: extern "C" fn() -> StateBox,
 
     /// Calculates the minimum between two integers
-    pub min: extern "C" fn(&mut State, i32, i32) -> i32,
+    pub min: extern "C" fn(&mut StateBox, i32, i32) -> i32,
 }
 
 // Marking `MinMod` as the main module in this plugin. Note that `MinMod_Ref` is

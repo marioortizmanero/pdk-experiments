@@ -15,4 +15,4 @@ crate-type = ["cdylib"]
 
 [dependencies]
 abi_stable = { version = "0.10", default-features = false }
-common-sabi-simple-old = { version = "0.1.0", path = "../common-old" }
+common-sabi-simple = { version = "0.1.0", path = "../common-old" }
