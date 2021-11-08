@@ -1,6 +1,7 @@
 use common_abi_stable_connectors::{
     event::{Event, OpaqueEventSerializer},
     sink::{RawSink_TO, SinkContext, SinkReply},
+    util::MayPanic::{self, NoPanic, Panic},
     value::Value,
     Result,
 };
@@ -51,13 +52,17 @@ impl Sink {
         ctx: &SinkContext,
         serializer: &mut OpaqueEventSerializer,
         start: u64,
-    ) -> ResultVec {
-        self.0
-            .on_event(input.into(), event, ctx, serializer, start)
-            .unwrap()
-            .map(Into::into) // RVec -> Vec
-            .map_err(Into::into) // RBoxError -> Box<dyn Error>
-            .into() // RResult -> Result
+    ) -> MayPanic<ResultVec> {
+        // NOTE: here we do return the `MayPanic` because we might want to
+        // recover from a call to `on_event`.
+        match self.0.on_event(input.into(), event, ctx, serializer, start) {
+            NoPanic(ret) => NoPanic(
+                ret.map(Into::into) // RVec -> Vec
+                    .map_err(Into::into) // RBoxError -> Box<dyn Error>
+                    .into(), // RResult -> Result
+            ),
+            Panic => Panic,
+        }
     }
 
     #[inline]
@@ -66,13 +71,17 @@ impl Sink {
         signal: Event,
         ctx: &SinkContext,
         serializer: &mut OpaqueEventSerializer,
-    ) -> ResultVec {
-        self.0
-            .on_signal(signal, ctx, serializer)
-            .unwrap()
-            .map(Into::into) // RVec -> Vec
-            .map_err(Into::into) // RBoxError -> Box<dyn Error>
-            .into() // RResult -> Result
+    ) -> MayPanic<ResultVec> {
+        // NOTE: here we do return the `MayPanic` because we might want to
+        // recover from a call to `on_event`.
+        match self.0.on_signal(signal, ctx, serializer) {
+            NoPanic(ret) => NoPanic(
+                ret.map(Into::into) // RVec -> Vec
+                    .map_err(Into::into) // RBoxError -> Box<dyn Error>
+                    .into(), // RResult -> Result
+            ),
+            Panic => Panic,
+        }
     }
 
     #[inline]
@@ -115,9 +124,15 @@ impl SinkManager {
                 .sink
                 .on_event("/in", event, &self.ctx, &mut self.serializer, 0)
             {
-                Ok(reply) => eprintln!("Sink reply: {:?}", reply),
-                Err(e) => eprintln!("Error notifying new event: {}", e),
+                NoPanic(Ok(reply)) => eprintln!("Sink reply: {:?}", reply),
+                NoPanic(Err(e)) => eprintln!("Error notifying new event: {}", e),
+                Panic => {
+                    eprintln!("Sink panicked! Ending loop, waiting for runtime to be shut down");
+                    break;
+                }
             }
         }
+
+        Ok(())
     }
 }

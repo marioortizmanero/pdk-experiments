@@ -4,6 +4,7 @@ use tokio::{task, time};
 
 use common_abi_stable_connectors::{
     source::{RawSource_TO, SourceContext, SourceReply},
+    util::MayPanic::{self, NoPanic, Panic},
     Result,
 };
 
@@ -37,12 +38,20 @@ impl SourceManagerBuilder {
 pub struct Source(pub RawSource_TO<'static, RBox<()>>);
 impl Source {
     #[inline]
-    pub fn pull_data(&mut self, pull_id: u64, ctx: &SourceContext) -> Result<SourceReply> {
-        self.0
-            .pull_data(pull_id, ctx)
-            .unwrap()
-            .map_err(Into::into) // RBoxError -> Box<dyn Error>
-            .into() // RResult -> Result
+    pub fn pull_data(
+        &mut self,
+        pull_id: u64,
+        ctx: &SourceContext,
+    ) -> MayPanic<Result<SourceReply>> {
+        // NOTE: here we do return the `MayPanic` because we might want to
+        // recover from a call to `on_event`.
+        match self.0.pull_data(pull_id, ctx) {
+            NoPanic(ret) => NoPanic(
+                ret.map_err(Into::into) // RBoxError -> Box<dyn Error>
+                    .into(), // RResult -> Result
+            ),
+            Panic => Panic,
+        }
     }
 
     #[inline]
@@ -65,17 +74,21 @@ impl SourceManager {
         loop {
             let data = self.source.pull_data(0, &self.ctx);
             match data {
-                Ok(SourceReply::Empty(ms)) => {
+                NoPanic(Ok(SourceReply::Empty(ms))) => {
                     println!("No data available, sleeping {} ms", ms);
                     time::sleep(Duration::from_millis(ms)).await;
                 }
-                Ok(SourceReply::Data(data)) => {
+                NoPanic(Ok(SourceReply::Data(data))) => {
                     println!("Sending '{}' to pipeline", data)
                 }
-                Err(e) => {
-                    eprintln!("Error in source: {}", e);
+                NoPanic(Err(e)) => eprintln!("Error in source: {}", e),
+                Panic => {
+                    eprintln!("Source panicked! Ending loop, waiting for runtime to be shut down");
+                    break;
                 }
             }
         }
+
+        Ok(())
     }
 }
