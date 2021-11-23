@@ -13,4 +13,5 @@ crate-type = ["cdylib"]
 
 [dependencies]
 abi_stable = { version = "0.10", default-features = false }
+async-ffi = { version = "0.3", features = ["sabi"], git = "https://github.com/marioortizmanero/async-ffi.git", branch = "sabi" }
 common-abi-stable-connectors = { version = "0.1.0", path = "../common" }

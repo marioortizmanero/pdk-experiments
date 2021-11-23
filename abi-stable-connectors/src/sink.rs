@@ -45,24 +45,20 @@ pub type ResultVec = Result<Vec<SinkReply>>;
 pub struct Sink(pub RawSink_TO<'static, RBox<()>>);
 impl Sink {
     #[inline]
-    pub fn on_event(
+    pub async fn on_event(
         &mut self,
         input: &str,
         event: Event,
         ctx: &SinkContext,
         serializer: &mut OpaqueEventSerializer,
         start: u64,
-    ) -> MayPanic<ResultVec> {
-        // NOTE: here we do return the `MayPanic` because we might want to
-        // recover from a call to `on_event`.
-        match self.0.on_event(input.into(), event, ctx, serializer, start) {
-            NoPanic(ret) => NoPanic(
-                ret.map(Into::into) // RVec -> Vec
-                    .map_err(Into::into) // RBoxError -> Box<dyn Error>
-                    .into(), // RResult -> Result
-            ),
-            Panic => Panic,
-        }
+    ) -> ResultVec {
+        self.0
+            .on_event(input.into(), event, ctx, serializer, start)
+            .await
+            .map(Into::into)
+            .map_err(Into::into)
+            .into()
     }
 
     #[inline]
@@ -123,16 +119,11 @@ impl SinkManager {
             match self
                 .sink
                 .on_event("/in", event, &self.ctx, &mut self.serializer, 0)
+                .await
             {
-                NoPanic(Ok(reply)) => eprintln!("Sink reply: {:?}", reply),
-                NoPanic(Err(e)) => eprintln!("Error notifying new event: {}", e),
-                Panic => {
-                    eprintln!("Sink panicked! Ending loop, waiting for runtime to be shut down");
-                    break;
-                }
+                Ok(reply) => eprintln!("Sink reply: {:?}", reply),
+                Err(e) => eprintln!("Error notifying new event: {}", e),
             }
         }
-
-        Ok(())
     }
 }

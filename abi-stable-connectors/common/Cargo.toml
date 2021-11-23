@@ -5,4 +5,5 @@ edition = "2018"
 
 [dependencies]
 abi_stable = { version = "0.10", default-features = false }
+async-ffi = { version = "0.3", features = ["sabi"], git = "https://github.com/marioortizmanero/async-ffi.git", branch = "sabi" }
 tokio = { version = "1.12", features = ["full"] }

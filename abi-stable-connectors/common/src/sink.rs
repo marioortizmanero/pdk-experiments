@@ -1,6 +1,7 @@
 use crate::{RResult, event::{Event, OpaqueEventSerializer, EventPayload}, util::MayPanic::{self, NoPanic}};
 
 use abi_stable::{std_types::{RString, RStr, RVec, RResult::ROk}, StableAbi, rvec};
+use async_ffi::FfiFuture;
 
 /// Stub for now
 #[repr(C)]
@@ -37,7 +38,7 @@ pub trait RawSink: Send {
         ctx: &SinkContext,
         serializer: &mut OpaqueEventSerializer,
         start: u64,
-    ) -> MayPanic<ResultVec>;
+    ) -> FfiFuture<ResultVec>;
     /// called when receiving a signal
     fn on_signal(
         &mut self,

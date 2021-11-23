@@ -12,6 +12,7 @@ use abi_stable::{
     },
     type_level::downcasting::TD_Opaque,
 };
+use async_ffi::{FfiFuture, FutureExt};
 
 use common_abi_stable_connectors::{
     connectors::{
@@ -69,19 +70,24 @@ impl RawSink for Reverse {
         _ctx: &SinkContext,
         _serializer: &mut OpaqueEventSerializer,
         _start: u64,
-    ) -> MayPanic<ResultVec> where {
-        match event.data {
-            Value::String(s) => {
-                // Note that this isn't how a string should be reversed
-                // properly; rather than iterating the characters it should be
-                // UTF-8 graphemes.
-                let reverse = s.trim().chars().rev().collect::<String>();
-                println!("Reverse: {}", reverse);
+    ) -> FfiFuture<ResultVec> {
+		// NOTE: doesn't really use async in this case, but this uses
+		// `FfiFuture` to learn how it works.
+        async move {
+            match event.data {
+                Value::String(s) => {
+                    // Note that this isn't how a string should be reversed
+                    // properly; rather than iterating the characters it should be
+                    // UTF-8 graphemes.
+                    let reverse = s.trim().chars().rev().collect::<String>();
+                    println!("Reverse: {}", reverse);
 
-                NoPanic(ROk(rvec![SinkReply::Ack]))
+                    ROk(rvec![SinkReply::Ack])
+                }
+                Value::Integer(_) => ROk(rvec![SinkReply::Fail]),
             }
-            Value::Integer(_) => NoPanic(ROk(rvec![SinkReply::Fail])),
         }
+		.into_ffi()
     }
 }
 
