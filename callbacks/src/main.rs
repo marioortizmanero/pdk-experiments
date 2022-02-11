@@ -3,6 +3,7 @@ const NUM_THREADS: i32 = 10;
 mod raw {
     use super::NUM_THREADS;
     use std::sync::atomic::{AtomicI32, Ordering};
+    use std::thread;
 
     // This type is shared by the plugin and the runtime
     #[repr(C)]
@@ -12,8 +13,11 @@ mod raw {
     }
 
     // This is the plugin. It only invokes the callback with its own ID.
-    extern "C" fn plugin_fn(ctx: &ConnectorContext) {
-        (ctx.callback)(ctx.id);
+    extern "C" fn plugin_fn(ctx: ConnectorContext) {
+        // Asynchronous communication!
+        thread::spawn(move || {
+            (ctx.callback)(ctx.id);
+        });
     }
 
     // This is the runtime. It will run a few plugins concurrently.
@@ -28,9 +32,9 @@ mod raw {
 
         let mut handles = Vec::new();
         for id in 0..NUM_THREADS {
-            handles.push(std::thread::spawn(move || {
+            handles.push(thread::spawn(move || {
                 let ctx = ConnectorContext { id, callback };
-                plugin_fn(&ctx);
+                plugin_fn(ctx);
             }))
         }
 
@@ -44,6 +48,7 @@ mod raw {
 
 mod nicer {
     mod wrapper {
+        #[repr(C)]
         pub struct Sender<T> {
             callback: extern "C" fn(T),
         }
@@ -60,6 +65,7 @@ mod nicer {
     }
 
     use super::NUM_THREADS;
+    use std::thread;
     use wrapper::Sender;
 
     // This type is shared by the plugin and the runtime
@@ -70,8 +76,11 @@ mod nicer {
     }
 
     // This is the plugin. It only invokes the callback with its own ID.
-    extern "C" fn plugin_fn(ctx: &ConnectorContext) {
-        ctx.sender.send(ctx.id);
+    extern "C" fn plugin_fn(ctx: ConnectorContext) {
+        // Asynchronous communication!
+        thread::spawn(move || {
+            ctx.sender.send(ctx.id);
+        });
     }
 
     // This is the runtime. It will run a few plugins concurrently.
@@ -87,7 +96,7 @@ mod nicer {
                     id,
                     sender: Sender::new(callback),
                 };
-                plugin_fn(&ctx);
+                plugin_fn(ctx);
             }))
         }
 
